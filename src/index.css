@@ -723,7 +723,7 @@ html, body{
 .shop-toolbar {
   display: flex;
   align-items: center;
-  gap: 500px;
+  gap: 470px;
   flex-wrap: wrap;
   
 }
@@ -733,6 +733,8 @@ html, body{
   align-items: center;
   gap: 10px;
   border : none;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
 }
 
 .control p {
@@ -929,4 +931,14 @@ html, body{
 /* RIGHT */
 .next-btn {
   right: 5px;
+}
+
+.filter,
+.sort {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #444;
+  font-family: "Montserrat", sans-serif;
 }

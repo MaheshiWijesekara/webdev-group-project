@@ -9,33 +9,33 @@ function Cart() {
 
   const addToCart = (product) => {
 
-  const existingCart =
-    JSON.parse(localStorage.getItem("cart")) || [];
+    const existingCart =
+      JSON.parse(localStorage.getItem("cart")) || [];
 
-  const existingProduct = existingCart.find(
-    (item) => item.id === product.id
-  );
+    const existingProduct = existingCart.find(
+      (item) => item.id === product.id
+    );
 
-  if (existingProduct) {
+    if (existingProduct) {
 
-    existingProduct.quantity += quantity;
+      existingProduct.quantity += quantity;
 
-  } else {
+    } else {
 
-    existingCart.push({
-      ...product,
-      quantity: quantity,
-    });
+      existingCart.push({
+        ...product,
+        quantity: quantity,
+      });
 
-  }
+    }
 
-  localStorage.setItem(
-    "cart",
-    JSON.stringify(existingCart)
-  );
+    localStorage.setItem(
+      "cart",
+      JSON.stringify(existingCart)
+    );
 
-  alert("Added to cart!");
-};
+    alert("Added to cart!");
+  };
 
   useEffect(() => {
     const savedCartString = localStorage.getItem("cart");
