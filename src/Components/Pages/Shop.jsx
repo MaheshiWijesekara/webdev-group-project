@@ -6,14 +6,36 @@ function Shop() {
     list.filter((p) => p.subcategory === name);
 
   const [category, setCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("default");
+  const [availability, setAvailability] = useState("all");
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isSecondImage, setIsSecondImage] = useState(false);
 
-  const filteredProducts =
-    category === "all"
-      ? products
-      : products.filter((p) => p.category === category);
+  let filteredProducts = [...products];
+
+  // 1. category filter
+  if (category !== "all") {
+    filteredProducts = filteredProducts.filter(
+      (p) => p.category === category
+    );
+  }
+
+  // 2. availability filter
+  if (availability !== "all") {
+    filteredProducts = filteredProducts.filter(
+      (p) => p.availability === availability
+    );
+  }
+
+  // 3. sort/tag filter
+  if (sortBy !== "default") {
+    filteredProducts = filteredProducts.filter(
+      (p) => p.tag === sortBy
+    );
+  }
+
 
   const skinSections = [
     { title: "Cleansers", key: "Cleanser" },
@@ -96,7 +118,7 @@ function Shop() {
             <option value="Accessories">Accessories</option>
           </select>
 
-          <select className="availability">
+          <select className="availability" onChange={(e) => setAvailability(e.target.value)}>
             <option>AVAILABILITY </option>
             <option value="In">In Stock</option>
             <option value="Out">Out of Stock</option>
@@ -105,10 +127,12 @@ function Shop() {
 
         <div className="control">
           <p className="sort">Sort By :</p>
-          <select>
-            <option>Default</option>
-            <option>Best Selling</option>
-            <option>Most relevant</option>
+          <select onChange={(e) => setSortBy(e.target.value)}>
+            <option value="default">Default</option>
+            <option value="Best">Best Selling</option>
+            <option value="Rele">Most relevant</option>
+            <option value="New">Newest</option>
+            <option value="Sale">Sale</option>
           </select>
         </div>
 
@@ -118,7 +142,7 @@ function Shop() {
       {category === "all" ? (
         <>
           <div className="product-grid">
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <div className="product-card" key={p.id}>
                 <img src={p.image}
                   alt={p.name}
@@ -301,91 +325,91 @@ function Shop() {
         </>
 
       ) : category === "Accessories" ? (
-      <>
-        <h3 className="section-title">Accessories</h3>
+        <>
+          <h3 className="section-title">Accessories</h3>
 
-        <div className="product-grid">
-          {filteredProducts.map((p) => (
-            <div key={p.id} className="product-card">
-              <img
-                src={p.image}
-                alt={p.name}
-                onMouseOver={(e) => (e.target.src = p.secondImage)}
-                onMouseOut={(e) => (e.target.src = p.image)}
-              />
+          <div className="product-grid">
+            {filteredProducts.map((p) => (
+              <div key={p.id} className="product-card">
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  onMouseOver={(e) => (e.target.src = p.secondImage)}
+                  onMouseOut={(e) => (e.target.src = p.image)}
+                />
 
-              <p>{p.name}</p>
-              <p>{p.price}</p>
-              <p>{"⭐".repeat(p.rating)}</p>
+                <p>{p.name}</p>
+                <p>{p.price}</p>
+                <p>{"⭐".repeat(p.rating)}</p>
 
-              <button onClick={() => setSelectedProduct(p)}>
-                View Details
+                <button onClick={() => setSelectedProduct(p)}>
+                  View Details
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+
+      ) : (<p>Coming soon...</p>)
+      }
+
+      {/*Popup screen*/}
+      {
+        selectedProduct && (
+
+          <div className="popup-overlay">
+
+            <div className="popup-box">
+
+              <button className="close-btn" onClick={() => setSelectedProduct(null)}>
+                ❌
               </button>
+
+              <div className="image-wrapper">
+
+                <button className="prev-btn" onClick={() => setIsSecondImage(false)}>
+                  ←
+                </button>
+
+                <img src={isSecondImage ? selectedProduct.secondImage : selectedProduct.image} alt={selectedProduct.name} />
+
+                <button className="next-btn" onClick={() => setIsSecondImage(true)}>
+                  →
+                </button>
+
+              </div>
+
+              <h2>{selectedProduct.name}</h2>
+              <p>{selectedProduct.description}</p>
+              <h3>{selectedProduct.price}</h3>
+
+              <div className="quantity-box">
+
+                <button onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>
+                  -
+                </button>
+
+                <span>{quantity}</span>
+
+                <button onClick={() => setQuantity(quantity + 1)}>
+                  +
+                </button>
+
+              </div>
+
+              <button className="cart-btn" onClick={() => addToCart(selectedProduct)}>
+                Add To Cart
+              </button>
+              <br></br><br></br>
+              <button className="cart-btn">
+                Add To Wishlist
+              </button>
+
             </div>
-          ))}
-        </div>
-       </>
+          </div>
 
-  ):(<p>Coming soon...</p>)
-}
-
-{/*Popup screen*/ }
-{
-  selectedProduct && (
-
-    <div className="popup-overlay">
-
-      <div className="popup-box">
-
-        <button className="close-btn" onClick={() => setSelectedProduct(null)}>
-          ❌
-        </button>
-
-        <div className="image-wrapper">
-
-          <button className="prev-btn" onClick={() => setIsSecondImage(false)}>
-            ←
-          </button>
-
-          <img src={isSecondImage ? selectedProduct.secondImage : selectedProduct.image} alt={selectedProduct.name} />
-
-          <button className="next-btn" onClick={() => setIsSecondImage(true)}>
-            →
-          </button>
-
-        </div>
-
-        <h2>{selectedProduct.name}</h2>
-        <p>{selectedProduct.description}</p>
-        <h3>{selectedProduct.price}</h3>
-
-        <div className="quantity-box">
-
-          <button onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>
-            -
-          </button>
-
-          <span>{quantity}</span>
-
-          <button onClick={() => setQuantity(quantity + 1)}>
-            +
-          </button>
-
-        </div>
-
-        <button className="cart-btn" onClick={() => addToCart(selectedProduct)}>
-          Add To Cart
-        </button>
-        <br></br><br></br>
-        <button className="cart-btn">
-          Add To Wishlist
-        </button>
-
-      </div>
-    </div>
-
-  )
-}
+        )
+      }
     </>
   );
 }
