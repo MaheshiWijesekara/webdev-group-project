@@ -9,6 +9,9 @@ import Checkout from "./Components/Pages/Checkout";
 import Footer from "./Components/Footer/Footer";
 import About from "./Components/Pages/About";
 import Shop from "./Components/Pages/Shop";
+import Stores from "./Components/Pages/Stores";
+import Blog from "./Components/Pages/Blog";
+import Contact from "./Components/Pages/Contact";
 
 
 function App() {
@@ -25,6 +28,9 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/about" element={<About />} />
         <Route path="/shop" element={<div className="app-content"><Shop /></div>} />
+        <Route path="/stores" element={<Stores />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
       
       <Footer />

@@ -96,13 +96,13 @@ const Nav = () => {
                     <Link to="/Shop" className="nav-link">Shop All</Link>
                 </li>
                 <li className="nav-item">
-                    <Link to="/" className="nav-link">Store</Link>
+                    <Link to="/Stores" className="nav-link">Store</Link>
                 </li>
                 <li className="nav-item">
-                    <Link to="/" className="nav-link">Blog</Link>
+                    <Link to="/Blog" className="nav-link">Blog</Link>
                 </li>
                 <li className="nav-item">
-                    <Link to="/" className="nav-link">Contact</Link>
+                    <Link to="/Contact" className="nav-link">Contact</Link>
                 </li>
             </ul>
 

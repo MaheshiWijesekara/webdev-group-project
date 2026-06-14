@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "name": "Tips & Procedure To Apply Luxury Beauty Cosmetic Cream",
+    "title": "Natural Cleansers",
+    "image": "/Images/Images/blog-1.webp",
+    "author": "By Hiếu Bùi",
+    "date": "Jan 10, 2025"
+  },
+  {
+    "id": 2,
+    "name": "The Ultimate Guide to Choosing the Right Night Serum",
+    "title": "Anti-Aging",
+    "image": "/Images/Images/blog-2.webp",
+    "author": "By Lan Anh",
+    "date": "Jan 12, 2025"
+  },
+  {
+    "id": 3,
+    "name": "How to Maintain Glowing Skin During the Winter Season",
+    "title": "Hydration Tips",
+    "image": "/Images/Images/blog-3.webp",
+    "author": "By Minh Quân",
+    "date": "Jan 15, 2025"
+  },
+  {
+    "id": 4,
+    "name": "Top 10 Organic Ingredients for Sensitive Skin Types",
+    "title": "Eco-Beauty",
+    "image": "/Images/Images/blog-4.webp",
+    "author": "By Thúy Vi",
+    "date": "Jan 18, 2025"
+  },
+  {
+    "id": 5,
+    "name": "Essential Daily Sunscreen Routine for All Skin Tones",
+    "title": "Sun Protection",
+    "image": "/Images/Images/blog-5.webp",
+    "author": "By Hoàng Nam",
+    "date": "Jan 20, 2025"
+  },
+  {
+    "id": 6,
+    "name": "Secret Makeup Techniques for a Natural Everyday Look",
+    "title": "Makeup Mastery",
+    "image": "/Images/Images/blog-6.webp",
+    "author": "By Ngọc Diệp",
+    "date": "Jan 22, 2025"
+  },
+  {
+    "id": 7,
+    "name": "Revitalize Your Hair with These Ancient Herbal Remedies",
+    "title": "Hair Care",
+    "image": "/Images/Images/blog-7.webp",
+    "author": "By Bảo Long",
+    "date": "Jan 25, 2025"
+  },
+  {
+    "id": 8,
+    "name": "Understanding the Science Behind Hyaluronic Acid",
+    "title": "Skincare Science",
+    "image": "/Images/Images/blog-8.webp",
+    "author": "By Khánh Linh",
+    "date": "Jan 28, 2025"
+  },
+  {
+    "id": 9,
+    "name": "A Beginner's Guide to Double Cleansing for Clearer Skin",
+    "title": "Daily Routine",
+    "image": "/Images/Images/blog-9.webp",
+    "author": "By Tuấn Anh",
+    "date": "Feb 01, 2025"
+  },
+  {
+    "id": 10,
+    "name": "Sustainable Packaging: The Future of Beauty Brands",
+    "title": "Industry Trends",
+    "image": "/Images/Images/blog-10.webp",
+    "author": "By Phương Thảo",
+    "date": "Feb 03, 2025"
+  },
+  {
+    "id": 11,
+    "name": "The Benefits of Facial Yoga for a Youthful Appearance",
+    "title": "Wellness",
+    "image": "/Images/Images/blog-11.webp",
+    "author": "By Hải Yến",
+    "date": "Feb 05, 2025"
+  },
+  {
+    "id": 12,
+    "name": "How to Build a Minimalist Skincare Routine That Works",
+    "title": "Skin Minimalism",
+    "image": "/Images/Images/blog-12.webp",
+    "author": "By Đức Thịnh",
+    "date": "Feb 08, 2025"
+  }
+]
