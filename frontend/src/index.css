@@ -652,11 +652,27 @@ html, body{
 /* about section */
 
 .about-glowing-section {
-  min-height: 80vh;
-  background-image: url('assets/bg-about.webp');
+  min-height: 85vh;
+  background-image: url('assets/about_page/about_head.png');
   background-repeat: no-repeat;
-  background-size: contain;
-  background-position: right center;
+  background-size: cover;
+  background-position: center 45%;
+  opacity: 0.9;
+;
+}
+
+.about-title {
+    color: white;
+    font-weight: 800;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.about-subtitle {
+    color: #FFD166;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
 }
 
 .about-section {

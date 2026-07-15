@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 
-import head from './../../assets/about-head-shape.webp';
-import about1 from './../../assets/banner-female-2.webp';
-import about2 from './../../assets/discover-1.webp';
-import client1 from './../../assets/brand-logo-1.png';
-import client2 from './../../assets/brand-logo-2.png';
-import client3 from './../../assets/brand-logo-3.png';
-import client4 from './../../assets/brand-logo-4.png';
-import client5 from './../../assets/brand-logo-5.png';
-import client6 from './../../assets/brand-logo-6.png';
+import head from './../../assets/about_page/about-head-shape.webp';
+import about1 from './../../assets/about_page/about_img2.jpg';
+import about2 from './../../assets/about_page/about_img3.png';
+import client1 from './../../assets/about_page/brand-logo-1.png';
+import client2 from './../../assets/about_page/brand-logo-2.png';
+import client3 from './../../assets/about_page/brand-logo-3.png';
+import client4 from './../../assets/about_page/brand-logo-4.png';
+import client5 from './../../assets/about_page/brand-logo-5.png';
+import client6 from './../../assets/about_page/brand-logo-6.png';
 
 const About = () => {
 
@@ -25,8 +25,8 @@ const About = () => {
         <div className="container">
             <div className="row">
                 <div className="col-md-6 text-md-start text-center">
-                    <p className="text-uppercase text-muted small mb-2">Introducing</p>
-                    <h1 className="fw-bold display-5">About Virelle</h1>
+                    <p className="text-uppercase small mb-2 about-subtitle ">Introducing</p>
+                    <h1 className="fw-bold display-5 about-title">About Virelle</h1>
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@ const About = () => {
         <div className="container">
             <div className="row align-items-center flex-md-row-reverse">
                 <div className="col-md-6 mb-4 mb-md-0 about-img1">
-                    <img src={about2} alt="" className="img-fluid rounded" />
+                    <img src={about2} alt="" className="img-fluid rounded" style={{ opacity: 0.9 }} />
                 </div>
                 <div className="col-md-6">
                     <h4 className="fw-bold">Our Mission</h4>
