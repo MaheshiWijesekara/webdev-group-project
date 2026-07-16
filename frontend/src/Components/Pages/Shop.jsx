@@ -1,7 +1,9 @@
 import products from "src/Products.json";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function Shop() {
+  
   const getBySubcategory = (list, name) =>
     list.filter((p) => p.subcategory === name);
 
@@ -102,6 +104,12 @@ function Shop() {
 
   return (
     <>
+
+    <ol className="section-banner py-3 position-relative" style={{ marginTop: "-18px" , maxWidth: "100%"}}>
+            <li className="position-relative"><Link to="/">Home</Link></li>
+            <li className="position-relative active"><span className='ps-5'>Shop</span></li>
+    </ol>
+    
       <h1 className="shop-all">Shop All Products</h1>
 
       <div className="shop-toolbar">

@@ -288,10 +288,11 @@ html, body{
   display: flex;
   align-items: center;
   color: var(--text-color);
-  width: 100%;
   text-align: center;
   justify-content: center;
   margin-top: 80px;
+  width: 100vw;                 
+  margin-left: calc(50% - 50vw);
 }
 
 .section-banner li a{
