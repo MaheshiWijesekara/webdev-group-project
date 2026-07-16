@@ -3,24 +3,25 @@ import React from 'react'
 function Contact() {
   return (
     <>
-      <section className="contact-section mt-5">
+      <section className="contact-section mt-4">
         <div className="container">
             <h2 className="section-title">Keep in Touch with Us</h2>
             <p className="section-subtitle">
                 Be the first to know about our latest news and special offers and <br/> expert beauty tips for radiant skin
             </p>
-            <div className="row contact-boxes">
+            <div className="row contact-boxes ">
                 <div className="contact-col">
-                    <div className="contact-box bg-transparent bg-0">
+                    <div className="contact-box bg-transparent bg-1">
                         <i class="bi bi-geo-alt-fill"></i>
                         <h5>Address</h5>
+                        <p>123 Main Street, New York, NY 10001</p>
                         <p>123 Main Street, New York, NY 10001</p>
                         <p className="mb-4">123 Main Street, New York, NY 10001</p>
                         <a href="https://www.google.com/maps" className="link" target='_blank' rel='noopener noreferrer'>Get Direction</a>
                     </div>
                 </div>
                 <div className="contact-col">
-                    <div className="contact-box bg-transparent border-0">
+                    <div className="contact-box bg-transparent border-1 ">
                         <i className='bi bi-telephone'></i>
                         <h5>Contact</h5>
                         <p><strong>Mobile: </strong>+94 123 456 789</p>
@@ -29,7 +30,7 @@ function Contact() {
                     </div>
                 </div>
                 <div className="contact-col">
-                    <div className="contact-box bg-transparent border-0">
+                    <div className="contact-box bg-transparent border-1">
                         <i className='bi bi-clock'></i>
                         <h5>Hours of Operation</h5>
                         <p><strong>Mon - Fri: </strong>9:00 AM - 6:00 PM</p>
@@ -50,6 +51,8 @@ function Contact() {
             allowfullscreen>
             </iframe>
         </section>
+
+        <br></br>
 
         <section className="message-section">
             <h2 className="form-title">Send A Message</h2>
