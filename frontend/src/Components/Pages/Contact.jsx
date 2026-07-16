@@ -42,7 +42,7 @@ function Contact() {
 
     <div className="contact-page">
         {/* map section */}
-        <section className='map-section container'>
+        <section id="map" className='map-section container'>
             <iframe 
             title="Our Location"
             className='map rounded'
