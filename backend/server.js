@@ -2,45 +2,37 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 const app = express();
-app.use(express.json()); // To parse JSON bodies
-app.use(cors());         // To allow React to talk to Express
+app.use(express.json());
+app.use(cors());
 
-// 1. Database Connection
+// Connect to MySQL
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'root',      
-    password: '', 
+    user: 'root',      // Your MySQL username
+    password: 'amti@1362', // Your MySQL password
     database: 'virelle_db'
 });
 
 db.connect(err => {
-    if (err) console.error('Database connection failed:', err);
-    else console.log('Connected to MySQL Database');
-});
-
-// 2. Signup Route
-app.post('/api/signup', async (req, res) => {
-    const { name, email, password } = req.body;
-
-    try {
-        
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
-        db.query(sql, [name, email, hashedPassword], (err, result) => {
-            if (err) {
-                if (err.code === 'ER_DUP_ENTRY') {
-                    return res.status(400).send({ message: "Email already exists" });
-                }
-                return res.status(500).send(err);
-            }
-            res.status(201).send({ message: "User registered successfully!" });
-        });
-    } catch (error) {
-        res.status(500).send({ message: "Error hashing password" });
-    }
+    if (err) console.log("Database Connection Failed!", err);
+    else console.log("MySQL Connected...");
 });
 
 app.listen(5000, () => console.log("Server running on port 5000"));
+
+// This route gets all products from the database
+app.get('/api/products', (req, res) => {
+    const sql = "SELECT * FROM products";
+    
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching products:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        // Send the database rows back to the frontend as JSON
+        res.json(results);
+    });
+});

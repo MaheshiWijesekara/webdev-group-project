@@ -1,44 +1,57 @@
-import products from "src/Products.json";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 function Shop() {
+  // 1. STATE FOR PRODUCTS (Replacing the JSON import)
+  const [products, setProducts] = useState([]);
   
-  const getBySubcategory = (list, name) =>
-    list.filter((p) => p.subcategory === name);
-
+  // 2. EXISTING STATES
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("default");
   const [availability, setAvailability] = useState("all");
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isSecondImage, setIsSecondImage] = useState(false);
 
+  // 3. FETCH PRODUCTS FROM BACKEND ON COMPONENT LOAD
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data);
+      })
+      .catch((err) => console.log("Error fetching products:", err));
+  }, []);
+
+  // 4. HELPER FUNCTION FOR SUBCATEGORIES
+  const getBySubcategory = (list, name) =>
+    list.filter((p) => p.subcategory === name);
+
+  // 5. FILTERING LOGIC
   let filteredProducts = [...products];
 
-  // 1. category filter
+  // Category filter
   if (category !== "all") {
     filteredProducts = filteredProducts.filter(
       (p) => p.category === category
     );
   }
 
-  // 2. availability filter
+  // Availability filter
   if (availability !== "all") {
     filteredProducts = filteredProducts.filter(
       (p) => p.availability === availability
     );
   }
 
-  // 3. sort/tag filter
+  // Sort/Tag filter
   if (sortBy !== "default") {
     filteredProducts = filteredProducts.filter(
       (p) => p.tag === sortBy
     );
   }
 
-
+  // 6. SECTION CONFIGURATIONS
   const skinSections = [
     { title: "Cleansers", key: "Cleanser" },
     { title: "Toners", key: "Toner" },
@@ -57,11 +70,10 @@ function Shop() {
   const bodySections = [
     { title: "Body Lotions", key: "Body Lotion" },
     { title: "Body Oils", key: "Body Oil" },
-    { title: "Body Washes", key: "Body Wash" },
+    { title: "Body Washes", key: "Body Was Wash" },
     { title: "Exfoliating Scrubs", key: "Exfoliating Scrub" },
     { title: "Hand Creams", key: "Hand Cream" },
     { title: "Foot Creams", key: "Foot Cream" },
-
   ];
 
   const hairSections = [
@@ -77,16 +89,10 @@ function Shop() {
     { title: "Deodorants", key: "Deodorant" },
   ];
 
-
-
-
+  // 7. ADD TO CART LOGIC
   const addToCart = (product) => {
-    const existingCart =
-      JSON.parse(localStorage.getItem("cart")) || [];
-
-    const existingProduct = existingCart.find(
-      (item) => item.id === product.id
-    );
+    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
+    const existingProduct = existingCart.find((item) => item.id === product.id);
 
     if (existingProduct) {
       existingProduct.quantity += Number(quantity);
@@ -98,22 +104,20 @@ function Shop() {
     }
 
     localStorage.setItem("cart", JSON.stringify(existingCart));
-
+    window.dispatchEvent(new Event("cartUpdated")); // Sync Navbar
     alert("Added to cart!");
   };
 
   return (
     <>
+      <ol className="section-banner py-3 position-relative" style={{ marginTop: "-18px", maxWidth: "100%" }}>
+        <li className="position-relative"><Link to="/">Home</Link></li>
+        <li className="position-relative active"><span className='ps-5'>Shop</span></li>
+      </ol>
 
-    <ol className="section-banner py-3 position-relative" style={{ marginTop: "-18px" , maxWidth: "100%"}}>
-            <li className="position-relative"><Link to="/">Home</Link></li>
-            <li className="position-relative active"><span className='ps-5'>Shop</span></li>
-    </ol>
-    
       <h1 className="shop-all">Shop All Products</h1>
 
       <div className="shop-toolbar">
-
         <div className="control">
           <p className="filter">Filter :</p>
           <select onChange={(e) => setCategory(e.target.value)}>
@@ -127,7 +131,7 @@ function Shop() {
           </select>
 
           <select className="availability" onChange={(e) => setAvailability(e.target.value)}>
-            <option>AVAILABILITY </option>
+            <option value="all">AVAILABILITY</option>
             <option value="In">In Stock</option>
             <option value="Out">Out of Stock</option>
           </select>
@@ -143,281 +147,160 @@ function Shop() {
             <option value="Sale">Sale</option>
           </select>
         </div>
-
       </div>
 
-      {/*all products section*/}
+      {/* --- PRODUCT RENDERING SECTION --- */}
+      
       {category === "all" ? (
-        <>
-          <div className="product-grid">
-            {filteredProducts.map((p) => (
-              <div className="product-card" key={p.id}>
-                <img src={p.image}
-                  alt={p.name}
-                  onMouseOver={(e) => (e.target.src = p.secondImage)}
-                  onMouseOut={(e) => (e.target.src = p.image)} />
-                <p>{p.name}</p>
-                <p>{p.price}</p>
-                <p>
-                  {"⭐".repeat(p.rating)}
-                </p>
-                <button onClick={() => {
-                  setSelectedProduct(p);
-                  setIsSecondImage(false);
-                }} >
-                  View Details
-                </button>
-              </div>
-            ))}
-          </div>
-
-
-        </>
-
-        /* Skin care section*/
+        <div className="product-grid">
+          {filteredProducts.map((p) => (
+            <div className="product-card" key={p.id}>
+              <img 
+                src={p.image} 
+                alt={p.pname} 
+                onMouseOver={(e) => (e.target.src = p.secondImage)} 
+                onMouseOut={(e) => (e.target.src = p.image)} 
+              />
+              <p className="fw-bold">{p.pname}</p>
+              <p>RS.{p.price}</p>
+              <p>{"⭐".repeat(p.rating)}</p>
+              <button onClick={() => { setSelectedProduct(p); setIsSecondImage(false); }}>
+                View Details
+              </button>
+            </div>
+          ))}
+        </div>
       ) : category === "Skin" ? (
-        <>
-          {skinSections.map((section) => (
-            <div key={section.key}>
-              <br />
-              <h3 className="section-title">{section.title}</h3>
-
-              <div className="product-grid">
-                {getBySubcategory(filteredProducts, section.key).map((p) => (
-                  <div key={p.id} className="product-card">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      onMouseOver={(e) => (e.target.src = p.secondImage)}
-                      onMouseOut={(e) => (e.target.src = p.image)}
-                    />
-
-                    <p>{p.name}</p>
-                    <p>{p.price}</p>
-                    <p>{"⭐".repeat(p.rating)}</p>
-
-                    <button onClick={() => setSelectedProduct(p)}>
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
+        skinSections.map((section) => (
+          <div key={section.key}>
+            <h3 className="section-title">{section.title}</h3>
+            <div className="product-grid">
+              {getBySubcategory(filteredProducts, section.key).map((p) => (
+                <div key={p.id} className="product-card">
+                  <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
+                  <p>{p.pname}</p>
+                  <p>RS.{p.price}</p>
+                  <p>{"⭐".repeat(p.rating)}</p>
+                  <button onClick={() => setSelectedProduct(p)}>View Details</button>
+                </div>
+              ))}
             </div>
-          ))}
-
-
-        </>
-
-        // Lip care section
+          </div>
+        ))
       ) : category === "Lip" ? (
-        <>
-          {lipSections.map((section) => (
-            <div key={section.key}>
-              <br />
-              <h3 className="section-title">{section.title}</h3>
-
-              <div className="product-grid">
-                {getBySubcategory(filteredProducts, section.key).map((p) => (
-                  <div key={p.id} className="product-card">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      onMouseOver={(e) => (e.target.src = p.secondImage)}
-                      onMouseOut={(e) => (e.target.src = p.image)}
-                    />
-
-                    <p>{p.name}</p>
-                    <p>{p.price}</p>
-                    <p>{"⭐".repeat(p.rating)}</p>
-
-                    <button onClick={() => setSelectedProduct(p)}>
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
+        lipSections.map((section) => (
+          <div key={section.key}>
+            <h3 className="section-title">{section.title}</h3>
+            <div className="product-grid">
+              {getBySubcategory(filteredProducts, section.key).map((p) => (
+                <div key={p.id} className="product-card">
+                  <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
+                  <p>{p.pname}</p>
+                  <p>RS.{p.price}</p>
+                  <p>{"⭐".repeat(p.rating)}</p>
+                  <button onClick={() => setSelectedProduct(p)}>View Details</button>
+                </div>
+              ))}
             </div>
-          ))}
-        </>
-
+          </div>
+        ))
       ) : category === "Body" ? (
-        <>
-          {bodySections.map((section) => (
-            <div key={section.key}>
-              <br />
-              <h3 className="section-title">{section.title}</h3>
-
-              <div className="product-grid">
-                {getBySubcategory(filteredProducts, section.key).map((p) => (
-                  <div key={p.id} className="product-card">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      onMouseOver={(e) => (e.target.src = p.secondImage)}
-                      onMouseOut={(e) => (e.target.src = p.image)}
-                    />
-
-                    <p>{p.name}</p>
-                    <p>{p.price}</p>
-                    <p>{"⭐".repeat(p.rating)}</p>
-
-                    <button onClick={() => setSelectedProduct(p)}>
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
+        bodySections.map((section) => (
+          <div key={section.key}>
+            <h3 className="section-title">{section.title}</h3>
+            <div className="product-grid">
+              {getBySubcategory(filteredProducts, section.key).map((p) => (
+                <div key={p.id} className="product-card">
+                  <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
+                  <p>{p.pname}</p>
+                  <p>RS.{p.price}</p>
+                  <p>{"⭐".repeat(p.rating)}</p>
+                  <button onClick={() => setSelectedProduct(p)}>View Details</button>
+                </div>
+              ))}
             </div>
-          ))}
-        </>
-
+          </div>
+        ))
       ) : category === "Hair" ? (
-        <>
-          {hairSections.map((section) => (
-            <div key={section.key}>
-              <br />
-              <h3 className="section-title">{section.title}</h3>
-
-              <div className="product-grid">
-                {getBySubcategory(filteredProducts, section.key).map((p) => (
-                  <div key={p.id} className="product-card">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      onMouseOver={(e) => (e.target.src = p.secondImage)}
-                      onMouseOut={(e) => (e.target.src = p.image)}
-                    />
-
-                    <p>{p.name}</p>
-                    <p>{p.price}</p>
-                    <p>{"⭐".repeat(p.rating)}</p>
-
-                    <button onClick={() => setSelectedProduct(p)}>
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
+        hairSections.map((section) => (
+          <div key={section.key}>
+            <h3 className="section-title">{section.title}</h3>
+            <div className="product-grid">
+              {getBySubcategory(filteredProducts, section.key).map((p) => (
+                <div key={p.id} className="product-card">
+                  <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
+                  <p>{p.pname}</p>
+                  <p>RS.{p.price}</p>
+                  <p>{"⭐".repeat(p.rating)}</p>
+                  <button onClick={() => setSelectedProduct(p)}>View Details</button>
+                </div>
+              ))}
             </div>
-          ))}
-        </>
+          </div>
+        ))
       ) : category === "Fragrances" ? (
-        <>
-          {fragranceSections.map((section) => (
-            <div key={section.key}>
-              <br />
-              <h3 className="section-title">{section.title}</h3>
-
-              <div className="product-grid">
-                {getBySubcategory(filteredProducts, section.key).map((p) => (
-                  <div key={p.id} className="product-card">
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      onMouseOver={(e) => (e.target.src = p.secondImage)}
-                      onMouseOut={(e) => (e.target.src = p.image)}
-                    />
-
-                    <p>{p.name}</p>
-                    <p>{p.price}</p>
-                    <p>{"⭐".repeat(p.rating)}</p>
-
-                    <button onClick={() => setSelectedProduct(p)}>
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
+        fragranceSections.map((section) => (
+          <div key={section.key}>
+            <h3 className="section-title">{section.title}</h3>
+            <div className="product-grid">
+              {getBySubcategory(filteredProducts, section.key).map((p) => (
+                <div key={p.id} className="product-card">
+                  <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
+                  <p>{p.pname}</p>
+                  <p>RS.{p.price}</p>
+                  <p>{"⭐".repeat(p.rating)}</p>
+                  <button onClick={() => setSelectedProduct(p)}>View Details</button>
+                </div>
+              ))}
             </div>
-          ))}
-        </>
-
+          </div>
+        ))
       ) : category === "Accessories" ? (
         <>
           <h3 className="section-title">Accessories</h3>
-
           <div className="product-grid">
             {filteredProducts.map((p) => (
               <div key={p.id} className="product-card">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  onMouseOver={(e) => (e.target.src = p.secondImage)}
-                  onMouseOut={(e) => (e.target.src = p.image)}
-                />
-
-                <p>{p.name}</p>
-                <p>{p.price}</p>
+                <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
+                <p>{p.pname}</p>
+                <p>RS.{p.price}</p>
                 <p>{"⭐".repeat(p.rating)}</p>
-
-                <button onClick={() => setSelectedProduct(p)}>
-                  View Details
-                </button>
+                <button onClick={() => setSelectedProduct(p)}>View Details</button>
               </div>
             ))}
           </div>
         </>
+      ) : (
+        <p className="text-center py-5">Coming soon...</p>
+      )}
 
-      ) : (<p>Coming soon...</p>)
-      }
-
-      {/*Popup screen*/}
-      {
-        selectedProduct && (
-
-          <div className="popup-overlay">
-
-            <div className="popup-box">
-
-              <button className="close-btn" onClick={() => setSelectedProduct(null)}>
-                ❌
-              </button>
-
-              <div className="image-wrapper">
-
-                <button className="prev-btn" onClick={() => setIsSecondImage(false)}>
-                  ←
-                </button>
-
-                <img src={isSecondImage ? selectedProduct.secondImage : selectedProduct.image} alt={selectedProduct.name} />
-
-                <button className="next-btn" onClick={() => setIsSecondImage(true)}>
-                  →
-                </button>
-
-              </div>
-
-              <h2>{selectedProduct.name}</h2>
-              <p>{selectedProduct.description}</p>
-              <h3>{selectedProduct.price}</h3>
-
-              <div className="quantity-box">
-
-                <button onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>
-                  -
-                </button>
-
-                <span>{quantity}</span>
-
-                <button onClick={() => setQuantity(quantity + 1)}>
-                  +
-                </button>
-
-              </div>
-
-              <button className="cart-btn" onClick={() => addToCart(selectedProduct)}>
-                Add To Cart
-              </button>
-              <br></br><br></br>
-              <button className="cart-btn">
-                Add To Wishlist
-              </button>
-
+      {/* --- POPUP MODAL SECTION --- */}
+      {selectedProduct && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <button className="close-btn" onClick={() => setSelectedProduct(null)}>❌</button>
+            <div className="image-wrapper">
+              <button className="prev-btn" onClick={() => setIsSecondImage(false)}>←</button>
+              <img src={isSecondImage ? selectedProduct.secondImage : selectedProduct.image} alt={selectedProduct.pname} />
+              <button className="next-btn" onClick={() => setIsSecondImage(true)}>→</button>
             </div>
-          </div>
 
-        )
-      }
+            <h2>{selectedProduct.pname}</h2>
+            <p>{selectedProduct.pdescription}</p>
+            <h3>RS.{selectedProduct.price}</h3>
+
+            <div className="quantity-box">
+              <button onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>-</button>
+              <span>{quantity}</span>
+              <button onClick={() => setQuantity(quantity + 1)}>+</button>
+            </div>
+
+            <button className="cart-btn" onClick={() => addToCart(selectedProduct)}>Add To Cart</button>
+            <br /><br />
+            <button className="cart-btn">Add To Wishlist</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

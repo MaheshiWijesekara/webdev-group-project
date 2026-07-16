@@ -1,8 +1,7 @@
-import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation } from "swiper/modules";
-
+import React, { useState, useEffect } from "react"; 
 // Toastify
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,7 +12,7 @@ import "swiper/css/navigation";
 import "swiper/css/effect-fade";
 
 // data - MAKE SURE THIS PATH IS EXACTLY CORRECT
-import Products from "./../../Products.json";
+// import Products from "./../../Products.json";
 
 import subBanner1 from "./../../assets/banner-1.webp";
 import subBanner2 from "./../../assets/banner-2.webp";
@@ -40,6 +39,7 @@ import socialImage5 from "./../../assets/social-image-5.jpg";
 
 function Index() {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]); // Start with an empty array
 
   const addToWishlist = (product) => {
     try {
@@ -48,9 +48,9 @@ function Index() {
         const updated = [...existing, product];
         localStorage.setItem("wishlist", JSON.stringify(updated));
         window.dispatchEvent(new Event("wishlistUpdated"));
-        toast.success(`${product.name} added to wishlist!`);
+        toast.success(`${product.pname} added to wishlist!`);
       } else {
-        toast.info(`${product.name} is already in wishlist!`);
+        toast.info(`${product.pname} is already in wishlist!`);
       }
     } catch (err) {
       console.error("Wishlist Error:", err);
@@ -66,14 +66,24 @@ function Index() {
         const updatedCart = [...existing, updatedProduct];
         localStorage.setItem("cart", JSON.stringify(updatedCart));
         window.dispatchEvent(new Event("cartUpdated"));
-        toast.success(`${product.name} added to cart!`);
+        toast.success(`${product.pname} added to cart!`);
       } else {
-        toast.info(`${product.name} is already in cart!`);
+        toast.info(`${product.pname} is already in cart!`);
       }
     } catch (err) {
       console.error("Cart Error:", err);
     }
   };
+
+  useEffect(() => {
+    // 1. Point to your backend URL
+    fetch('http://localhost:5000/api/products')
+        .then(response => response.json()) // 2. Turn the data into a JS object
+        .then(data => {
+            setProducts(data); // 3. Save the data into our 'products' state
+        })
+        .catch(err => console.log("Error fetching data:", err));
+}, []); // Empty brackets mean "run only once when the page loads"
 
   return (
     <>
@@ -154,7 +164,7 @@ function Index() {
             }}
           >
             {/* SAFE FILTER: Convert ID to Number to ensure comparison works */}
-            {Products.filter(
+            {products.filter(
               (p) => Number(p.id) >= 5 && Number(p.id) <= 10,
             ).map((product) => (
               <SwiperSlide key={product.id}>
@@ -163,7 +173,7 @@ function Index() {
                     <img
                       src={product.image}
                       className="img-fluid"
-                      alt={product.name}
+                      alt={product.pname}
                     />
                     <img
                       src={product.secondImage}
@@ -193,7 +203,7 @@ function Index() {
                   >
                     <div className="product-content pt-3">
                       <span className="d-block fw-bold">{product.price}</span>
-                      <h3 className="fs-6 mt-1">{product.name}</h3>
+                      <h3 className="fs-6 mt-1">{product.pname}</h3>
                     </div>
                   </Link>
                 </div>
@@ -336,7 +346,7 @@ function Index() {
 
             <div className="col-lg-7">
               <div className="row">
-                {Products.filter(
+                {products.filter(
                   (p) => Number(p.id) >= 10 && Number(p.id) <= 15,
                 ).map((product) => (
                   <div key={product.id} className="col-md-4 col-6 mb-4">
@@ -345,7 +355,7 @@ function Index() {
                         <img
                           src={product.image}
                           className="img-fluid"
-                          alt={product.name}
+                          alt={product.pname}
                         />
                         <img
                           src={product.secondImage}
@@ -354,12 +364,7 @@ function Index() {
                         />
 
                         <div className="product-icons d-flex gap-2">
-                          <div
-                            className="product-icon"
-                            onClick={() => navigate(`/product/${product.id}`)}
-                          >
-                            <i className="bi bi-eye"></i>
-                          </div>
+                          
                           <div
                             className="product-icon"
                             onClick={() => addToCart(product)}
@@ -377,7 +382,7 @@ function Index() {
                           <span className="d-block fw-bold">
                             {product.price}
                           </span>
-                          <h3 className="fs-6 mt-1">{product.name}</h3>
+                          <h3 className="fs-6 mt-1">{product.pname}</h3>
                         </div>
                       </Link>
                     </div>
