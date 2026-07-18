@@ -40,7 +40,7 @@ function Wishlist() {
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     window.dispatchEvent(new Event('cartUpdated'));
 
-    toast.success(`${product.name} added to cart!`, {
+    toast.success(`${product.pname} added to cart!`, {
         position: "top-right",
         autoClose: 2000,
         hideProgressBar: false,
@@ -74,7 +74,7 @@ function Wishlist() {
                     <div className="col" key={product.id}>
                         <div className="card h-100 shadow-sm border-0">
                             <div className="position-relative overflow-hidden" style={{height:'250px', backgroundColor:'#f8f9fa'}}>
-                                <img src={product.image} className="card-img-top h-100 object-fit-cover" alt={product.name} />
+                                <img src={product.image} className="card-img-top h-100 object-fit-cover" alt={product.pname} />
                                 {product.tag && (
                                     <span className={`position-absolute top-0 end-0 badge m-2 ${product.tag === "New" ? "bg-danger" : "bg-success"}`}>
                                         {product.tag}
@@ -83,7 +83,7 @@ function Wishlist() {
                             </div>
                             <div className="card-body d-flex flex-column text-center">
                                 <p className="card-text fs-5 fw-semibold text-dark">{product.price}</p>
-                                <h5 className="card-title">{product.name}</h5>
+                                <h5 className="card-title">{product.pname}</h5>
                                 <div className="mt-auto d-flex justify-content-between gap-2">
                                     <button className="btn w-100" onClick={() => addtoCart(product)}>
                                         <i className="bi bi-cart me-2"></i>Add to Cart

@@ -776,12 +776,17 @@ html, body{
 }
 
 .product-card {
-  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ensures all cards in a row have the same height */
+  padding: 15px;
+  background-color: #f1f1ef; /* Match your background color */
   text-align: center;
-  background-color: #e5e3d9;
-  font-size: 14px;
-  height : 570px;
-  
+}
+
+.product-card p.fw-bold {
+  min-height: 3em; /* Ensures 2-3 lines of space always exist */
+  margin-bottom: 5px;
 }
 
 .product-card img {
@@ -793,13 +798,12 @@ html, body{
 }
 
 .product-card button {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background-color: #e5e3d9;
-  color: black;
-  border: 1px solid grey;
-  border-radius: 7px;
+  margin-top: auto; /* This is the "Magic" line that aligns them */
+  padding: 8px 20px;
+  border: 1px solid #333;
+  background: transparent;
   cursor: pointer;
+  align-self: center; /* Keeps button centered horizontally */
 }
 
 .product-card button:hover {

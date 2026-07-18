@@ -1,20 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from '../../AuthContext'; // Import the AuthContext
 
 const Nav = () => {
+    // --- Auth Context Consumption ---
+    const { user, login, logout } = useContext(AuthContext);
+
     // --- Existing Cart/Wishlist State ---
     const [cartCount, setCartCount] = useState(0);
     const [wishlistCount, setWishlistCount] = useState(0);
 
-    // --- New Signup Form State ---
+    // --- Modal View Toggle State ---
+    const [isLoginMode, setIsLoginMode] = useState(true); // Toggle between Login and Signup
+
+    // --- Signup Form State ---
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: ''
     });
 
-    // Handle Input Changes
+    // --- Login Form State ---
+    const [loginData, setLoginData] = useState({
+        email: '',
+        password: ''
+    });
+
+    // Handle Input Changes for Signup
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -22,22 +35,50 @@ const Nav = () => {
         });
     };
 
-    // Handle Form Submission to Backend
+    // Handle Input Changes for Login
+    const handleLoginChange = (e) => {
+        setLoginData({
+            ...loginData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    // Handle Signup Submission
     const handleSignup = async (e) => {
-        e.preventDefault(); // Stop page from refreshing
+        e.preventDefault(); 
         try {
-            // Adjust the URL if your server is running on a different port
-            const response = await axios.post('http://localhost:5000/api/signup', formData);
-            
-            alert(response.data.message || "Signup Successful!");
-            
-            // Reset form fields
+            const response = await axios.post('http://localhost:5000/api/register', formData);
+            alert(response.data.message || "Signup Successful! Now please Sign In.");
             setFormData({ name: '', email: '', password: '' });
-            
-            // Optional: Close modal manually or redirect user
+            setIsLoginMode(true); // Switch to login view after successful signup
         } catch (error) {
             console.error("Signup Error:", error);
-            alert(error.response?.data?.message || "An error occurred during signup");
+            alert(error.response?.data?.error || "An error occurred during signup");
+        }
+    };
+
+    // --- Handle Login Submission ---
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:5000/api/login', loginData);
+            
+            // Call the login function from AuthContext
+            login(response.data.user, response.data.token);
+            
+            alert("Welcome back, " + response.data.user.name);
+            
+            // Clear form and close modal (via Bootstrap attribute or state)
+            setLoginData({ email: '', password: '' });
+            
+            // To close modal automatically in Bootstrap 5 without jQuery:
+            const modalElement = document.getElementById('authModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) modalInstance.hide();
+
+        } catch (error) {
+            console.error("Login Error:", error);
+            alert(error.response?.data?.error || "Incorrect email or password");
         }
     };
 
@@ -92,9 +133,13 @@ const Nav = () => {
                     <ul className="d-lg-none d-flex align-items-center gap-3 list-unstyled m-0">
                         <li className="nav-item"><a href="#"><i className="bi bi-search fs-5 text-dark"></i></a></li>
                         <li className="nav-item">
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#signupModal">
-                                <i className="bi bi-person fs-5 text-dark"></i>
-                            </a>
+                            {user ? (
+                                <span className="fw-bold small">{user.name.split(' ')[0]}</span>
+                            ) : (
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#authModal">
+                                    <i className="bi bi-person fs-5 text-dark"></i>
+                                </a>
+                            )}
                         </li>
                         <li className="nav-item position-relative">
                             <Link to="/Wishlist">
@@ -104,7 +149,7 @@ const Nav = () => {
                         </li>
                         <li className="nav-item position-relative">
                             <Link to="/Cart">
-                                <i className="bi bi-bag fs-5 text-dark"></i>
+                                <i className="bi bi-cart fs-5 text-dark"></i>
                                 <span className="position-absolute top-0 start-100 translate-middle cart-quont rounded-pill">{cartCount}</span>
                             </Link>
                         </li>
@@ -129,11 +174,27 @@ const Nav = () => {
                         {/* Desktop Icons */}
                         <ul className="navbar-nav d-none d-lg-flex align-items-center gap-4">
                             <li className="nav-item"><a href="#"><i className="bi bi-search fs-5 text-dark"></i></a></li>
-                            <li className="nav-item">
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#signupModal">
-                                    <i className="bi bi-person fs-5 text-dark"></i>
-                                </a>
+                            
+                            {/* Conditional Rendering for User Greeting */}
+                            <li className="nav-item d-flex align-items-center gap-3">
+                                {user ? (
+                                    <div className="dropdown">
+                                        <span className="fw-bold text-uppercase dropdown-toggle" style={{cursor: 'pointer'}} data-bs-toggle="dropdown">
+                                            HELLO, {user.name.split(' ')[0]}
+                                        </span>
+                                        <ul className="dropdown-menu border-0 shadow-sm">
+                                            <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
+                                            <li><hr className="dropdown-divider"/></li>
+                                            <li><button className="dropdown-item" onClick={logout}>Logout</button></li>
+                                        </ul>
+                                    </div>
+                                ) : (
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#authModal">
+                                        <i className="bi bi-person fs-5 text-dark"></i>
+                                    </a>
+                                )}
                             </li>
+
                             <li className="nav-item position-relative">
                                 <Link to="/Wishlist">
                                     <i className="bi bi-heart fs-5 text-dark"></i>
@@ -151,62 +212,98 @@ const Nav = () => {
                 </nav>
             </div>
 
-            {/* Signup Modal */}
-            <div className="modal fade" id="signupModal" tabIndex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+            {/* Authentication Modal (Combined Login/Signup) */}
+            <div className="modal fade" id="authModal" tabIndex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content p-4">
-                        <div className="modal-header border-0">
-                            <h5 className="modal-title fw-bold" id="signupModalLabel">Sign Up</h5>
+                    <div className="modal-content p-4 border-0 rounded-4">
+                        <div className="modal-header border-0 pb-0">
+                            <h5 className="modal-title fw-bold fs-3" id="authModalLabel">
+                                {isLoginMode ? "Sign In" : "Create Account"}
+                            </h5>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
-                            {/* Attach the handleSignup function to the form */}
-                            <form onSubmit={handleSignup}>
-                                <div className="mb-3">
-                                    <label className="form-label">Name</label>
-                                    <input 
-                                        type="text" 
-                                        name="name" 
-                                        className="form-control" 
-                                        placeholder="Enter your name" 
-                                        value={formData.name} 
-                                        onChange={handleChange} 
-                                        required 
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Email Address</label>
-                                    <input 
-                                        type="email" 
-                                        name="email" 
-                                        className="form-control" 
-                                        placeholder="Enter email address" 
-                                        value={formData.email} 
-                                        onChange={handleChange} 
-                                        required 
-                                    />
-                                </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Password</label>
-                                    <input 
-                                        type="password" 
-                                        name="password" 
-                                        className="form-control" 
-                                        placeholder="Enter password" 
-                                        value={formData.password} 
-                                        onChange={handleChange} 
-                                        required 
-                                    />
-                                </div>
-                                <p className='text-muted'>
-                                    By signing up, you agree to our <a href="#" className='text-success text-decoration-none'>Terms of Service</a> and <a href="#" className='text-success text-decoration-none'>Privacy Policy</a>.
-                                </p>
-                                {/* Submit button inside the form */}
-                                <button type='submit' className="btn btn-dark w-100">Sign Up</button>
-                            </form>
-                            <div className="text-center mt-3">
-                                <p>Already have an account? <a href="#" className='text-success fw-bold'>Sign In</a></p>
-                            </div>
+                            
+                            {isLoginMode ? (
+                                // --- LOGIN FORM ---
+                                <form onSubmit={handleLogin}>
+                                    <div className="mb-3">
+                                        <label className="form-label small text-muted">Email Address</label>
+                                        <input 
+                                            type="email" 
+                                            name="email" 
+                                            className="form-control py-2" 
+                                            placeholder="name@example.com" 
+                                            value={loginData.email} 
+                                            onChange={handleLoginChange} 
+                                            required 
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small text-muted">Password</label>
+                                        <input 
+                                            type="password" 
+                                            name="password" 
+                                            className="form-control py-2" 
+                                            placeholder="Enter password" 
+                                            value={loginData.password} 
+                                            onChange={handleLoginChange} 
+                                            required 
+                                        />
+                                    </div>
+                                    <button type='submit' className="btn btn-dark w-100 py-2 fw-bold mt-2">Sign In</button>
+                                    <div className="text-center mt-4">
+                                        <p className="small">New to Virelle? <a href="#" className='text-dark fw-bold' onClick={() => setIsLoginMode(false)}>Create Account</a></p>
+                                    </div>
+                                </form>
+                            ) : (
+                                // --- SIGNUP FORM ---
+                                <form onSubmit={handleSignup}>
+                                    <div className="mb-3">
+                                        <label className="form-label small text-muted">Full Name</label>
+                                        <input 
+                                            type="text" 
+                                            name="name" 
+                                            className="form-control py-2" 
+                                            placeholder="Enter your name" 
+                                            value={formData.name} 
+                                            onChange={handleChange} 
+                                            required 
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small text-muted">Email Address</label>
+                                        <input 
+                                            type="email" 
+                                            name="email" 
+                                            className="form-control py-2" 
+                                            placeholder="Enter email address" 
+                                            value={formData.email} 
+                                            onChange={handleChange} 
+                                            required 
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small text-muted">Password</label>
+                                        <input 
+                                            type="password" 
+                                            name="password" 
+                                            className="form-control py-2" 
+                                            placeholder="Create a password" 
+                                            value={formData.password} 
+                                            onChange={handleChange} 
+                                            required 
+                                        />
+                                    </div>
+                                    <p className='text-muted' style={{fontSize: '0.75rem'}}>
+                                        By signing up, you agree to our <a href="#" className='text-dark text-decoration-underline'>Terms of Service</a> and <a href="#" className='text-dark text-decoration-underline'>Privacy Policy</a>.
+                                    </p>
+                                    <button type='submit' className="btn btn-dark w-100 py-2 fw-bold">Create Account</button>
+                                    <div className="text-center mt-4">
+                                        <p className="small">Already have an account? <a href="#" className='text-dark fw-bold' onClick={() => setIsLoginMode(true)}>Sign In</a></p>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     </div>
                 </div>

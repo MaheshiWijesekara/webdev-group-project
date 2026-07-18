@@ -68,7 +68,7 @@ function Cart() {
 
   const totalPrice = cartItems.reduce((acc, item) => {
     const priceString = item.price ? item.price.toString() : "0";
-    const price = parseFloat(priceString.replace("$", ""));
+    const price = parseFloat(priceString.replace("Rs.", ""));
     return acc + (isNaN(price) ? 0 : price * item.quantity);
   }, 0);
 
@@ -118,7 +118,7 @@ function Cart() {
                         <p className="text-muted mb-0">
                           Total RS.
                           {(
-                            parseFloat(item.price.replace("RS.", "")) *
+                            parseFloat(item.price.replace("Rs.", "")) *
                             item.quantity
                           ).toFixed(2)}
                         </p>

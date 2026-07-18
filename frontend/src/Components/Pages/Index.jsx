@@ -103,7 +103,7 @@ function Index() {
                 <h1>
                   Beauty Inspired <br /> by Real Life
                 </h1>
-                <Link to="/shop" className="btn hero-btn mt-3">
+                <Link to="/Shop" className="btn hero-btn mt-3">
                   Shop Now
                 </Link>
               </div>
@@ -118,9 +118,9 @@ function Index() {
                   Made using clean, non-toxic ingredients, our products are
                   designed for everyone
                 </p>
-                <a href="#" className="btn hero-btn mt-3">
+                <Link to="/Shop" className="btn hero-btn mt-3">
                   Shop Now
-                </a>
+                </Link>
               </div>
             </div>
           </SwiperSlide>
@@ -135,9 +135,9 @@ function Index() {
                   Made using clean, non-toxic ingredients, our products are
                   designed for everyone
                 </p>
-                <a href="#" className="btn hero-btn mt-3">
+                <Link to="/Shop" className="btn hero-btn mt-3">
                   Shop Now
-                </a>
+                </Link>
               </div>
             </div>
           </SwiperSlide>
@@ -230,7 +230,9 @@ function Index() {
                   Intensive Glow C+ <br /> Serum
                   <br />
                 </h1>
-                <button className="btn banner-btn mt-2">EXPLORE MORE</button>
+                <button className="btn banner-btn mt-2">
+                  EXPLORE MORE
+                  </button>
               </div>
             </div>
 

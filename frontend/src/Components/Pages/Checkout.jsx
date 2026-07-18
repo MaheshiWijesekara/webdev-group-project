@@ -18,7 +18,7 @@ function Checkout() {
   };
 
   const totalPrice = cartItems.reduce((acc, item) => {
-    const price = parseFloat(item.price.replace("$", "")) || 0;
+    const price = parseFloat(item.price.replace("Rs.", "")) || 0;
     return acc + price * (item.quantity || 1);
   }, 0);
 
@@ -296,7 +296,7 @@ function Checkout() {
                     <div className="fw-semibold">
                       $
                       {parseFloat(
-                        item.price.replace("$", "") * item.quantity,
+                        item.price.replace("Rs.", "") * item.quantity,
                       ).toFixed(2)}
                     </div>
                   </div>
