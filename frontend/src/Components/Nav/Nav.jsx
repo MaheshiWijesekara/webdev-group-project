@@ -14,7 +14,7 @@ const Nav = () => {
     // --- UI State ---
     const [isLoginMode, setIsLoginMode] = useState(true);
 
-    // --- 1. LOGIN STATE (This unlocks the input boxes) ---
+    // --- 1. LOGIN STATE ---
     const [loginData, setLoginData] = useState({
         email: '',
         password: ''
@@ -27,7 +27,7 @@ const Nav = () => {
         password: ''
     });
 
-    // --- 3. INPUT HANDLERS (Crucial for typing) ---
+    // --- 3. INPUT HANDLERS ---
     const handleLoginChange = (e) => {
         setLoginData({
             ...loginData,
@@ -73,8 +73,9 @@ const Nav = () => {
         }
     };
 
-    // --- 5. CART COUNT SYNC ---
+    // --- 5. COUNT SYNC (CART & WISHLIST) ---
     const updateCounts = async () => {
+        // CART SYNC
         if (user && user.id) {
             try {
                 const res = await axios.get(`http://localhost:5000/api/cart/${user.id}`);
@@ -86,6 +87,8 @@ const Nav = () => {
             const total = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
             setCartCount(total);
         }
+
+        // WISHLIST SYNC (Currently using LocalStorage as per previous steps)
         const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
         setWishlistCount(wishlist.length);
     };
@@ -110,31 +113,50 @@ const Nav = () => {
 
                     <Link to="/" className="navbar-brand d-lg-none mx-auto fw-bold">VIRELLE</Link>
 
-                    {/* Mobile Icons */}
+                    {/* --- MOBILE ICONS --- */}
                     <ul className="d-lg-none d-flex align-items-center gap-3 list-unstyled m-0">
                         <li className="nav-item">
                             {user ? <span className="fw-bold small">{user.name.split(' ')[0]}</span> : 
                             <a href="#" data-bs-toggle="modal" data-bs-target="#authModal"><i className="bi bi-person fs-5"></i></a>}
                         </li>
-                        <li className="nav-item position-relative"><Link to="/Cart"><i className="bi bi-cart3 fs-5"></i><span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{cartCount}</span></Link></li>
+                        {/* Mobile Wishlist */}
+                        <li className="nav-item position-relative">
+                            <Link to="/Wishlist">
+                                <i className="bi bi-heart fs-5 text-dark"></i>
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.6rem'}}>
+                                    {wishlistCount}
+                                </span>
+                            </Link>
+                        </li>
+                        {/* Mobile Cart */}
+                        <li className="nav-item position-relative">
+                            <Link to="/Cart">
+                                <i className="bi bi-cart3 fs-5 text-dark"></i>
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.6rem'}}>
+                                    {cartCount}
+                                </span>
+                            </Link>
+                        </li>
                     </ul>
 
                     <div className="collapse navbar-collapse justify-content-between" id='navbarNav'>
                         <ul className="navbar-nav gap-4">
                             <li><Link to="/" className="nav-link">Home</Link></li>
-                            <li><Link to="/Shop" className="nav-link">Shop All</Link></li>
                             <li><Link to="/About" className="nav-link">About</Link></li>
+                            <li><Link to="/Shop" className="nav-link">Shop All</Link></li>
                             <li><Link to="/Blog" className="nav-link">Blog</Link></li>
                             <li><Link to="/Contact" className="nav-link">Contact</Link></li>
                         </ul>
 
                         <Link to="/" className="navbar-brand d-none d-lg-flex fw-bold">VIRELLE</Link>
 
+                        {/* --- DESKTOP ICONS --- */}
                         <ul className="navbar-nav d-none d-lg-flex align-items-center gap-4">
+                            {/* User Menu */}
                             <li className="nav-item">
                                 {user ? (
                                     <div className="dropdown">
-                                        <span className="fw-bold text-uppercase dropdown-toggle" style={{cursor:'pointer'}} data-bs-toggle="dropdown">
+                                        <span className="fw-bold text-uppercase dropdown-toggle" style={{cursor:'pointer', color: '#B4975A'}} data-bs-toggle="dropdown">
                                             HELLO, {user.name.split(' ')[0]}
                                         </span>
                                         <ul className="dropdown-menu border-0 shadow-sm">
@@ -147,16 +169,25 @@ const Nav = () => {
                                     </a>
                                 )}
                             </li>
+
+                            {/* Desktop Wishlist */}
+                            <li className="nav-item position-relative">
+                                <Link to="/Wishlist">
+                                    <i className="bi bi-heart fs-5 text-dark"></i>
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.65rem'}}>
+                                        {wishlistCount}
+                                    </span>
+                                </Link>
+                            </li>
+
+                            {/* Desktop Cart */}
                             <li className="nav-item position-relative">
                                 <Link to="/Cart">
                                     <i className="bi bi-cart3 fs-5 text-dark"></i>
-                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{cartCount}</span>
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{fontSize: '0.65rem'}}>
+                                        {cartCount}
+                                    </span>
                                 </Link>
-                                {/* Wishlist icon can be added here if needed */}
-                                {/* <Link to="/Wishlist">
-                                    <i className="bi bi-heart fs-5 text-dark"></i>
-                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{wishlistCount}</span>
-                                </Link> */}
                             </li>
                         </ul>
                     </div>
@@ -175,26 +206,10 @@ const Nav = () => {
                             {isLoginMode ? (
                                 <form onSubmit={handleLogin}>
                                     <div className="mb-3">
-                                        <input 
-                                            type="email" 
-                                            name="email" 
-                                            className="form-control py-2" 
-                                            placeholder="Email" 
-                                            value={loginData.email} 
-                                            onChange={handleLoginChange} 
-                                            required 
-                                        />
+                                        <input type="email" name="email" className="form-control py-2" placeholder="Email" value={loginData.email} onChange={handleLoginChange} required />
                                     </div>
                                     <div className="mb-3">
-                                        <input 
-                                            type="password" 
-                                            name="password" 
-                                            className="form-control py-2" 
-                                            placeholder="Password" 
-                                            value={loginData.password} 
-                                            onChange={handleLoginChange} 
-                                            required 
-                                        />
+                                        <input type="password" name="password" className="form-control py-2" placeholder="Password" value={loginData.password} onChange={handleLoginChange} required />
                                     </div>
                                     <button type="submit" className="btn btn-dark w-100 py-2 fw-bold mt-2">Sign In</button>
                                     <p className="text-center mt-4 small">New? <a href="#" className="fw-bold text-dark" onClick={(e) => { e.preventDefault(); setIsLoginMode(false); }}>Create Account</a></p>

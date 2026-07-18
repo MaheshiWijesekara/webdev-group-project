@@ -76,7 +76,7 @@ function Cart() {
                     <div className="col-9">
                         <div className="d-flex justify-content-between">
                             <div>
-                                <h5 className="fw-bold mb-1">{item.name}</h5>
+                                <h5 className="fw-bold mb-1">{item.pname}</h5>
                                 <p className="text-muted small mb-0">Rs. {item.price}</p>
                             </div>
                             <div className="d-flex align-items-center gap-2">
@@ -92,8 +92,8 @@ function Cart() {
               ))}
             </div>
             <div className="col-lg-4">
-              <div className="card p-4 border-0 shadow-sm rounded-4 bg-light">
-                <h4 className="fw-bold mb-4">Summary</h4>
+              <div className="card p-4 border-0 shadow-sm rounded-4 style={{ backgroundColor: '#EDF1EE' }}">
+                <h4 className="fw-bold mb-4" style={{ color: '#2D402E' }}>Summary</h4>
                 <div className="d-flex justify-content-between mb-3"><span>Subtotal</span><span className="fw-bold">Rs. {totalPrice.toFixed(2)}</span></div>
                 <Link to="/checkout" className="btn btn-dark w-100 py-3 fw-bold rounded-pill">CHECKOUT</Link>
               </div>
