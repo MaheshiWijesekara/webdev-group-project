@@ -1,61 +1,52 @@
-import React, { useState, useEffect } from "react"; // 1. Added missing imports
+import React, { useState, useEffect, useContext } from "react"; 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
-import Navbar from "../Nav/Nav"; // 2. Added Navbar import
+import axios from 'axios'; 
+import { AuthContext } from "../../AuthContext"; 
+import Navbar from "../Nav/Nav";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
+  const { user } = useContext(AuthContext);
 
-  const addToCart = (product) => {
-
-    const existingCart =
-      JSON.parse(localStorage.getItem("cart")) || [];
-
-    const existingProduct = existingCart.find(
-      (item) => item.id === product.id
-    );
-
-    if (existingProduct) {
-
-      existingProduct.quantity += quantity;
-
-    } else {
-
-      existingCart.push({
-        ...product,
-        quantity: quantity,
-      });
-
-    }
-
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(existingCart)
-    );
-
-    alert("Added to cart!");
+  const getPrice = (price) => {
+    if (!price) return 0;
+    return parseFloat(price.toString().replace("Rs.", "").replace(",", "")) || 0;
   };
 
   useEffect(() => {
-    const savedCartString = localStorage.getItem("cart");
-    const savedCartArray = savedCartString ? JSON.parse(savedCartString) : [];
-    setCartItems(savedCartArray);
-  }, []);
+    const loadCart = async () => {
+        if (user && user.id) {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/cart/${user.id}`);
+                // Ensure we handle the database column 'pname'
+                const normalized = response.data.map(item => ({
+                    ...item,
+                    name: item.pname || item.name 
+                }));
+                setCartItems(normalized);
+                localStorage.setItem("cart", JSON.stringify(normalized));
+            } catch (err) { console.error(err); }
+        } else {
+            const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+            setCartItems(savedCart);
+        }
+    };
+    loadCart();
+  }, [user]); // This ensures the cart re-loads when the user logs in/out
 
   const updateQuantity = (id, type) => {
     const updated = cartItems.map((item) => {
       if (item.id === id) {
-        if (type === "increase") {
-          return { ...item, quantity: item.quantity + 1 };
-        } else if (type === "decrease" && item.quantity > 1) {
-          return { ...item, quantity: item.quantity - 1 };
-        }
+        let newQty = type === "increase" ? item.quantity + 1 : item.quantity - 1;
+        return { ...item, quantity: Math.max(1, newQty) };
       }
       return item;
     });
     setCartItems(updated);
     localStorage.setItem("cart", JSON.stringify(updated));
+    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   const removeItem = (id) => {
@@ -63,124 +54,54 @@ function Cart() {
     setCartItems(updated);
     localStorage.setItem("cart", JSON.stringify(updated));
     window.dispatchEvent(new Event("cartUpdated"));
-    toast.error("Item removed from cart");
+    toast.error("Item removed");
   };
 
-  const totalPrice = cartItems.reduce((acc, item) => {
-    const priceString = item.price ? item.price.toString() : "0";
-    const price = parseFloat(priceString.replace("Rs.", ""));
-    return acc + (isNaN(price) ? 0 : price * item.quantity);
-  }, 0);
+  const totalPrice = cartItems.reduce((acc, item) => acc + (getPrice(item.price) * item.quantity), 0);
 
   return (
     <>
       <Navbar />
-      <ol className="section-banner py-3 position-relative">
-        <li className="position-relative">
-          <Link to="/">Home</Link>
-        </li>
-        <li className="position-relative active">
-          <a href="#" className="ps-5">
-            Cart
-          </a>
-        </li>
-      </ol>
-
-      <div className="container my-5">
-        <div className="text-center mb-4 fw-bold">💚 Your Cart</div>
+      <div className="container py-5 mt-5">
+        <h2 className="text-center fw-bold mb-5 pt-3">Your Shopping Cart</h2>
         {cartItems.length === 0 ? (
-          <div className="text-center">
-            <p className="lead">Your Cart is Empty!</p>
-            <Link to="/" className="btn mt-3">
-              Shop Now
-            </Link>
-          </div>
+          <div className="text-center py-5"><p>Empty cart!</p><Link to="/Shop" className="btn btn-dark">Shop Now</Link></div>
         ) : (
-          <div className="row g-4">
+          <div className="row">
             <div className="col-lg-8">
               {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="card shadow-sm border-0 rounded-4 mb-3 p-3"
-                >
+                <div key={item.id} className="card mb-3 p-3 border-0 shadow-sm rounded-4">
                   <div className="row align-items-center">
-                    <div className="col-3">
-                      <img
-                        src={item.image}
-                        className="img-fluid rounded-3"
-                        alt=""
-                      />
-                    </div>
-                    <div className="col-9 d-flex flex-column flex-md-row justify-content-between align-items-center">
-                      <div className="text-start w-100">
-                        <h5 className="mb-2">{item.name}</h5>
-                        <p className="text-muted mb-1">Price : {item.price}</p>
-                        <p className="text-muted mb-0">
-                          Total RS.
-                          {(
-                            parseFloat(item.price.replace("Rs.", "")) *
-                            item.quantity
-                          ).toFixed(2)}
-                        </p>
-                      </div>
-                      <div className="d-flex align-items-center gap-3 mt-3 mt-md-0">
-                        <button
-                          className="btn btn-sm"
-                          onClick={() => updateQuantity(item.id, "decrease")}
-                        >
-                          -
-                        </button>
-                        <span>{item.quantity}</span>
-                        <button
-                          className="btn btn-sm"
-                          onClick={() => updateQuantity(item.id, "increase")}
-                        >
-                          +
-                        </button>
-                        <button
-                          className="btn btn-sm"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          Remove
-                        </button>
-                      </div>
+                    <div className="col-3"><img src={item.image} className="img-fluid rounded" alt="" /></div>
+                    <div className="col-9">
+                        <div className="d-flex justify-content-between">
+                            <div>
+                                <h5 className="fw-bold mb-1">{item.name}</h5>
+                                <p className="text-muted small mb-0">Rs. {item.price}</p>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                                <button className="btn btn-light btn-sm border" onClick={() => updateQuantity(item.id, "decrease")}>-</button>
+                                <span className="fw-bold px-2">{item.quantity}</span>
+                                <button className="btn btn-light btn-sm border" onClick={() => updateQuantity(item.id, "increase")}>+</button>
+                                <button className="btn text-danger ms-3" onClick={() => removeItem(item.id)}><i className="bi bi-trash"></i></button>
+                            </div>
+                        </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
             <div className="col-lg-4">
-              <div className="card shadow-sm border-0 rounded-4 p-3">
-                <h4 className="fw-bold">Cart Summary</h4>
-                <hr />
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Total Items</span>
-                  <span>{cartItems.length}</span>
-                </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Total Price</span>
-                  <span className="fw-bold">RS.{totalPrice.toFixed(2)}</span>
-                </div>
-                <Link to="/checkout" className="btn w-100">
-                  Proceed to Checkout
-                </Link>
+              <div className="card p-4 border-0 shadow-sm rounded-4 bg-light">
+                <h4 className="fw-bold mb-4">Summary</h4>
+                <div className="d-flex justify-content-between mb-3"><span>Subtotal</span><span className="fw-bold">Rs. {totalPrice.toFixed(2)}</span></div>
+                <Link to="/checkout" className="btn btn-dark w-100 py-3 fw-bold rounded-pill">CHECKOUT</Link>
               </div>
             </div>
           </div>
         )}
-        <ToastContainer
-          position="top-right"
-          autoClose={2000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
       </div>
+      <ToastContainer position="bottom-right" />
     </>
   );
 }

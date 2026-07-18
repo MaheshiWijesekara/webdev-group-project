@@ -93,10 +93,26 @@ app.post('/api/login', (req, res) => {
 // 4. Cart Add (Hybrid: Save to DB)
 app.post('/api/cart/add', (req, res) => {
     const { userId, productId, quantity } = req.body;
-    const sql = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantity = quantity + ?";
-    db.query(sql, [userId, productId, quantity, quantity], (err, result) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: "Saved to Database" });
+    
+    // This SQL checks if the product is already in the user's cart
+    const checkSql = "SELECT * FROM cart WHERE user_id = ? AND product_id = ?";
+    
+    db.query(checkSql, [userId, productId], (err, results) => {
+        if (results.length > 0) {
+            // If it exists, UPDATE the quantity
+            const updateSql = "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?";
+            db.query(updateSql, [quantity, userId, productId], (err, result) => {
+                if (err) return res.status(500).json(err);
+                res.json({ message: "Quantity updated" });
+            });
+        } else {
+            // If it doesn't exist, INSERT new row
+            const insertSql = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+            db.query(insertSql, [userId, productId, quantity], (err, result) => {
+                if (err) return res.status(500).json(err);
+                res.json({ message: "Added to cart" });
+            });
+        }
     });
 });
 
@@ -135,6 +151,40 @@ app.post('/api/blogs', upload.single('image'), (req, res) => {
             return res.status(500).json({ error: "Database error: " + err.message });
         }
         res.status(201).json({ message: "Blog posted successfully!" });
+    });
+});
+
+// 1. Place Order Route
+app.post('/api/orders', (req, res) => {
+    const { userId, email, total } = req.body;
+    const sql = "INSERT INTO orders (user_id, customer_email, total_amount) VALUES (?, ?, ?)";
+    db.query(sql, [userId, email, total], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Order stored!" });
+    });
+});
+
+// 2. Clear Cart Route (When order is finished)
+app.delete('/api/cart/clear/:userId', (req, res) => {
+    const sql = "DELETE FROM cart WHERE user_id = ?";
+    db.query(sql, [req.params.userId], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Cart cleared" });
+    });
+});
+
+app.get('/api/cart/:userId', (req, res) => {
+    const userId = req.params.userId;
+    // We use a JOIN to get the product details along with the cart quantity
+    const sql = `
+        SELECT products.*, cart.quantity 
+        FROM cart 
+        JOIN products ON cart.product_id = products.id 
+        WHERE cart.user_id = ?`;
+
+    db.query(sql, [userId], (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
     });
 });
 
