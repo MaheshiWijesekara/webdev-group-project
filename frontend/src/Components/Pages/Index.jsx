@@ -75,15 +75,19 @@ function Index() {
     }
   };
 
-  useEffect(() => {
-    // 1. Point to your backend URL
+ useEffect(() => {
     fetch('http://localhost:5000/api/products')
-        .then(response => response.json()) // 2. Turn the data into a JS object
+        .then(response => response.json())
         .then(data => {
-            setProducts(data); // 3. Save the data into our 'products' state
+            // Check if data.products exists (because of your new backend format)
+            if (data && data.products) {
+                setProducts(data.products); 
+            } else {
+                setProducts(data); // Fallback if backend isn't paginated
+            }
         })
         .catch(err => console.log("Error fetching data:", err));
-}, []); // Empty brackets mean "run only once when the page loads"
+  }, []);
 
   return (
     <>
@@ -164,9 +168,9 @@ function Index() {
             }}
           >
             {/* SAFE FILTER: Convert ID to Number to ensure comparison works */}
-            {products.filter(
-              (p) => Number(p.id) >= 5 && Number(p.id) <= 10,
-            ).map((product) => (
+            {Array.isArray(products) && products.filter(
+  (p) => Number(p.id) >= 1 && Number(p.id) <= 10,
+).map((product) => (
               <SwiperSlide key={product.id}>
                 <div className="product-item text-center">
                   <div className="product-image overflow-hidden position-relative">
@@ -348,9 +352,9 @@ function Index() {
 
             <div className="col-lg-7">
               <div className="row">
-                {products.filter(
-                  (p) => Number(p.id) >= 10 && Number(p.id) <= 15,
-                ).map((product) => (
+                {Array.isArray(products) && products.filter(
+  (p) => p.category === 'Skin' // Or whatever category you have in your DB
+).slice(0, 6).map((product) => (
                   <div key={product.id} className="col-md-4 col-6 mb-4">
                     <div className="product-item text-center h-100 shadow-sm p-2 rounded">
                       <div className="product-image overflow-hidden position-relative">

@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+/* 1. Updated Imports with all required fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap');
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Urbanist", sans-serif;
+  /* Removed specific font here so body/headings can take over */
   list-style: none;
   text-decoration: none;
   scroll-behavior: smooth;
@@ -12,22 +13,31 @@
 
 :root {
   /* The "Natural" Palette */
-  --primary-green: #2D402E;    /* Deep Forest Green (Herbal/Natural) */
-  --accent-gold: #B4975A;     /* Muted Gold (Traditional/Premium) */
-  --soft-beige: #F9F7F2;      /* Off-white/Cream (Organic feel) */
-  --earth-brown: #5C4033;     /* Wood/Bark Brown */
-  --text-charcoal: #333333;   /* Softer than pure black */
+  --primary-green: #2D402E;    
+  --accent-gold: #B4975A;     
+  --soft-beige: #F9F7F2;      
+  --earth-brown: #5C4033;     
+  --text-charcoal: #333333;   
+  
+  /* Added these back so your old code doesn't break */
+  --black-color: #1a1a1a;
+  --white-color: #ffffff;
+  --prim-color: #B4975A; /* Link prim-color to your Gold */
+  
   --transition-smooth: 0.4s ease;
+  --transition-slow: 0.6s ease;
 }
 
 body {
-  background-color: var(--soft-beige); /* Cream background instead of white */
+  background-color: var(--soft-beige); 
   color: var(--text-charcoal);
   font-family: 'Montserrat', sans-serif;
+  overflow-x: hidden; /* Prevents horizontal scroll bugs */
 }
 
-h1, h2, h3, h4, .navbar-brand {
-  font-family: 'Playfair Display', serif; /* Elegant traditional serif */
+/* Elegant traditional serif for all headers */
+h1, h2, h3, h4, .navbar-brand, .shop-all, .section-title {
+  font-family: 'Playfair Display', serif !important;
 }
 
 .nav-wrapper {
@@ -141,7 +151,7 @@ h1, h2, h3, h4, .navbar-brand {
 }
 
 .hero-wrap2 {
-  background-image: url(assets/hero-bg-2.webp) !important;
+  background-image: url(assets/bg-2.png) !important;
 }
 
 .hero-wrap3 {
@@ -1047,7 +1057,7 @@ h1, h2, h3, h4, .navbar-brand {
   align-items: flex-start;
 }
 
-.blog content .blog-title span {
+.blog-content .blog-title span { 
   background-color: #f5f5f5;
   color: var(--black-color);
   width: fit-content;
@@ -1202,4 +1212,26 @@ h1, h2, h3, h4, .navbar-brand {
   input, .textarea {
     width: 100%;
   }
+}
+
+.search-box input:focus {
+    box-shadow: 0 0 0 2px var(--primary-green) !important;
+    outline: none;
+}
+
+.pagination-btn {
+    border-radius: 0; /* Keep the traditional sharp look */
+    border: 1px solid var(--primary-green);
+    color: var(--primary-green);
+    transition: 0.3s;
+}
+
+.pagination-btn.active {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }

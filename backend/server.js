@@ -50,12 +50,53 @@ db.connect(err => {
 
 // --- ROUTES ---
 
-// 1. Get all products
 app.get('/api/products', (req, res) => {
-    const sql = "SELECT * FROM products";
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
+    const page = parseInt(req.query.page) || 1;
+    const search = req.query.search || '';
+    const category = req.query.category || 'all';
+    const availability = req.query.availability || 'all';
+    const sortBy = req.query.sortBy || 'default';
+    
+    const limit = 8;
+    const offset = (page - 1) * limit;
+
+    // 1. Build Dynamic SQL Query
+    let query = "FROM products WHERE pname LIKE ?";
+    let params = [`%${search}%`];
+
+    if (category !== 'all') {
+        query += " AND category = ?";
+        params.push(category);
+    }
+    if (availability !== 'all') {
+        query += " AND availability = ?";
+        params.push(availability);
+    }
+
+    // 2. Handle Sorting
+    let sortSql = "";
+    if (sortBy === 'New') sortSql = " ORDER BY id DESC";
+    else if (sortBy === 'Sale') sortSql = " AND tag = 'Sale'";
+
+    // 3. Final Queries
+    const dataSql = "SELECT * " + query + sortSql + " LIMIT ? OFFSET ?";
+    const countSql = "SELECT COUNT(*) as total " + query;
+
+    db.query(dataSql, [...params, limit, offset], (err, products) => {
+        if (err) return res.status(500).json(err);
+
+        db.query(countSql, params, (err, countResult) => {
+            if (err) return res.status(500).json(err);
+
+            const totalProducts = countResult[0].total;
+            const totalPages = Math.ceil(totalProducts / limit);
+
+            res.json({
+                products: products,
+                totalPages: totalPages,
+                currentPage: page
+            });
+        });
     });
 });
 
@@ -185,6 +226,49 @@ app.get('/api/cart/:userId', (req, res) => {
     db.query(sql, [userId], (err, results) => {
         if (err) return res.status(500).json(err);
         res.json(results);
+    });
+});
+
+app.get('/api/products/:id', (req, res) => {
+    const sql = "SELECT * FROM products WHERE id = ?";
+    db.query(sql, [req.params.id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result[0]); // Send only the first result (the specific product)
+    });
+});
+
+// 1. GET reviews for a specific product (Includes the User's Name via JOIN)
+app.get('/api/reviews/:productId', (req, res) => {
+    const sql = `
+        SELECT reviews.*, users.name as user_name 
+        FROM reviews 
+        JOIN users ON reviews.user_id = users.id 
+        WHERE reviews.product_id = ? 
+        ORDER BY reviews.review_date DESC`;
+
+    db.query(sql, [req.params.productId], (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// 2. POST a new review
+app.post('/api/reviews', (req, res) => {
+    const { userId, productId, comment, rating } = req.body;
+    const sql = "INSERT INTO reviews (user_id, product_id, comment, rating) VALUES (?, ?, ?, ?)";
+    
+    db.query(sql, [userId, productId, comment, rating], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.status(201).json({ message: "Review added!" });
+    });
+});
+
+// 3. DELETE a review (To prove you can handle the 'D' in CRUD)
+app.delete('/api/reviews/:id', (req, res) => {
+    const sql = "DELETE FROM reviews WHERE id = ?";
+    db.query(sql, [req.params.id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Review deleted" });
     });
 });
 
