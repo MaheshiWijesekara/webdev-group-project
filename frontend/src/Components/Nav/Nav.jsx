@@ -160,6 +160,8 @@ const Nav = () => {
                                             HELLO, {user.name.split(' ')[0]}
                                         </span>
                                         <ul className="dropdown-menu border-0 shadow-sm">
+                                            <li><Link className="dropdown-item" to="/profile">My Account</Link></li>
+                                            <li><hr className="dropdown-divider"/></li>
                                             <li><button className="dropdown-item" onClick={logout}>Logout</button></li>
                                         </ul>
                                     </div>

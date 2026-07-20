@@ -2,6 +2,13 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../AuthContext"; 
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+
+// Import Swiper styles (if not already there)
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 // --- 1. IMPORT TOASTIFY ---
 import { ToastContainer, toast } from "react-toastify";
@@ -102,10 +109,7 @@ function Shop() {
 
   return (
     <>
-      <ol className="section-banner py-3 position-relative" style={{ marginTop: "-18px", maxWidth: "100%" }}>
-        <li className="position-relative"><Link to="/">Home</Link></li>
-        <li className="position-relative active"><span className='ps-5 text-dark'>Shop</span></li>
-      </ol>
+      
 
       <h1 className="shop-all">Shop All Products</h1>
 
@@ -161,13 +165,34 @@ function Shop() {
             <div className="product-grid">
             {filteredProducts.map((p) => (
                 <div className="product-card" key={p.id}>
-                <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
-                <p className="fw-bold mt-2 mb-1">{p.pname}</p>
-                <p className="text-muted">RS.{p.price}</p>
-                <button onClick={() => navigate(`/product/${p.id}`)}>
-  View Details
-</button>
-                </div>
+  <div className="product-image position-relative overflow-hidden">
+    <img 
+      src={p.image} 
+      alt={p.pname} 
+      className="img-fluid"
+      onMouseOver={(e) => (e.target.src = p.secondImage)} 
+      onMouseOut={(e) => (e.target.src = p.image)} 
+    />
+    
+    {/* --- QUICK VIEW EYE ICON --- */}
+    <div className="quick-view-overlay d-flex align-items-center justify-content-center">
+        <button 
+          className="btn btn-light rounded-pill shadow-sm p-3" 
+          title="Quick View"
+          onClick={() => { setSelectedProduct(p); setQuantity(1); }}
+        >
+          <i className="bi bi-eye fs-4"></i>
+        </button>
+    </div>
+  </div>
+
+  <p className="fw-bold mt-2 mb-1">{p.pname}</p>
+  <p className="text-muted">RS.{p.price}</p>
+  
+  <button className="view-details-btn" onClick={() => navigate(`/product/${p.id}`)}>
+    View Details
+  </button>
+</div>
             ))}
             </div>
         ) : (
@@ -188,14 +213,35 @@ function Shop() {
                             <h3 className="section-title mt-4">{section.title}</h3>
                             <div className="product-grid">
                                 {getBySubcategory(filteredProducts, section.key).map(p => (
-                                    <div key={p.id} className="product-card">
-                                        <img src={p.image} alt={p.pname} onMouseOver={(e) => (e.target.src = p.secondImage)} onMouseOut={(e) => (e.target.src = p.image)} />
-                                        <p className="fw-bold mt-2 mb-1">{p.pname}</p>
-                                        <p className="text-muted">RS.{p.price}</p> 
-                                        <button onClick={() => navigate(`/product/${p.id}`)}>
-  View Details
-</button>
-                                    </div>
+                                    <div className="product-card" key={p.id}>
+  <div className="product-image position-relative overflow-hidden">
+    <img 
+      src={p.image} 
+      alt={p.pname} 
+      className="img-fluid"
+      onMouseOver={(e) => (e.target.src = p.secondImage)} 
+      onMouseOut={(e) => (e.target.src = p.image)} 
+    />
+    
+    {/* --- QUICK VIEW EYE ICON --- */}
+    <div className="quick-view-overlay d-flex align-items-center justify-content-center">
+        <button 
+          className="btn btn-light rounded-pill shadow-sm p-3" 
+          title="Quick View"
+          onClick={() => { setSelectedProduct(p); setQuantity(1); }}
+        >
+          <i className="bi bi-eye fs-4"></i>
+        </button>
+    </div>
+  </div>
+
+  <p className="fw-bold mt-2 mb-1">{p.pname}</p>
+  <p className="text-muted">RS.{p.price}</p>
+  
+  <button className="view-details-btn" onClick={() => navigate(`/product/${p.id}`)}>
+    View Details
+  </button>
+</div>
                                 ))}
                             </div>
                         </>

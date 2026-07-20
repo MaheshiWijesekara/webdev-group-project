@@ -54,13 +54,10 @@ function Wishlist() {
   return (
       <>
       <Navbar />
-      <ol className="section-banner py-3 position-relative">
-        <li className="position-relative"><Link to = "/">Home</Link></li>
-        <li className="position-relative active"><a href="#" className="ps-5">Wishlist</a></li>
-      </ol>
+      
 
-    <div className="container my-5">
-        <h2 className="text-center fw-bold mb-4"> 💚 Your Wishlist</h2>
+    <div className="container my-5 mt-5 pt-5">
+        <h2 className="text-center fw-bold mb-4">Your Wishlist</h2>
 
         {wishlist.length === 0 ? (
             <div className="text-center">

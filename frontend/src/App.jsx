@@ -12,6 +12,7 @@ import Shop from "./Components/Pages/Shop";
 import Stores from "./Components/Pages/Stores";
 import Blog from "./Components/Pages/Blog";
 import Contact from "./Components/Pages/Contact";
+import Profile from "./Components/Pages/Profile";
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       
       <Footer />

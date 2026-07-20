@@ -76,15 +76,12 @@ function Blog() {
             <Navbar />
             
             {/* Breadcrumbs */}
-            <ol className="section-banner py-3 position-relative">
-                <li className="position-relative"><Link to="/">Home</Link></li>
-                <li className="position-relative active"><span className='ps-5 text-dark'>News</span></li>
-            </ol>
+            
 
-            <div className="container py-5">
+            <div className="container py-5 mt-5 pt-5">
                 {/* Header Section */}
                 <div className="d-flex justify-content-between align-items-center mb-5">
-                    <h1 className="fw-semibold">Latest News</h1>
+                    <h1 className="fw-semibold text-center">LATEST NEWS</h1>
                     {/* Only show "Write a Blog" if user is logged in */}
                     {user && (
                         <button className="btn btn-dark px-4 py-2" onClick={() => setShowForm(true)}>

@@ -236,15 +236,15 @@ app.get('/api/products/:id', (req, res) => {
         res.json(result[0]); // Send only the first result (the specific product)
     });
 });
-
-// 1. GET reviews for a specific product (Includes the User's Name via JOIN)
+// 1. GET reviews
 app.get('/api/reviews/:productId', (req, res) => {
+    // Changed table name to product_reviews
     const sql = `
-        SELECT reviews.*, users.name as user_name 
-        FROM reviews 
-        JOIN users ON reviews.user_id = users.id 
-        WHERE reviews.product_id = ? 
-        ORDER BY reviews.review_date DESC`;
+        SELECT product_reviews.*, users.name as user_name 
+        FROM product_reviews 
+        JOIN users ON product_reviews.user_id = users.id 
+        WHERE product_reviews.product_id = ? 
+        ORDER BY product_reviews.review_date DESC`;
 
     db.query(sql, [req.params.productId], (err, results) => {
         if (err) return res.status(500).json(err);
@@ -252,23 +252,56 @@ app.get('/api/reviews/:productId', (req, res) => {
     });
 });
 
-// 2. POST a new review
+// 2. POST review
 app.post('/api/reviews', (req, res) => {
     const { userId, productId, comment, rating } = req.body;
-    const sql = "INSERT INTO reviews (user_id, product_id, comment, rating) VALUES (?, ?, ?, ?)";
+    // Changed table name to product_reviews
+    const sql = "INSERT INTO product_reviews (user_id, product_id, comment, rating) VALUES (?, ?, ?, ?)";
     
     db.query(sql, [userId, productId, comment, rating], (err, result) => {
-        if (err) return res.status(500).json(err);
+        if (err) {
+            console.error("DB Error:", err);
+            return res.status(500).json(err);
+        }
         res.status(201).json({ message: "Review added!" });
     });
 });
 
 // 3. DELETE a review (To prove you can handle the 'D' in CRUD)
 app.delete('/api/reviews/:id', (req, res) => {
-    const sql = "DELETE FROM reviews WHERE id = ?";
+    // Changed table name to product_reviews
+    const sql = "DELETE FROM product_reviews WHERE id = ?";
     db.query(sql, [req.params.id], (err, result) => {
         if (err) return res.status(500).json(err);
         res.json({ message: "Review deleted" });
+    });
+});
+
+// 1. Get Order History for a specific user
+app.get('/api/orders/:userId', (req, res) => {
+    const sql = "SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC";
+    db.query(sql, [req.params.userId], (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// 2. Update User Profile Name
+app.put('/api/user/update', (req, res) => {
+    const { id, name } = req.body;
+    db.query("UPDATE users SET name = ? WHERE id = ?", [name, id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Profile updated successfully!" });
+    });
+});
+
+// 3. Update Password (Security)
+app.put('/api/user/password', async (req, res) => {
+    const { id, newPassword } = req.body;
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    db.query("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Password changed!" });
     });
 });
 

@@ -250,8 +250,20 @@ h1, h2, h3, h4, .navbar-brand, .shop-all, .section-title {
 } 
 
 .product-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-view-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  cursor: pointer;
+  height: 100%;
+  background: rgba(45, 64, 46, 0.2); /* Deep green tint */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
 }
 
 .product-image img:nth-child(2) {
@@ -854,6 +866,30 @@ h1, h2, h3, h4, .navbar-brand, .shop-all, .section-title {
 
 .product-card p.fw-bold {
   color: var(--primary-green);
+}
+
+.product-card:hover .quick-view-overlay {
+  opacity: 1;
+}
+
+.quick-view-overlay button {
+  transform: translateY(20px);
+  transition: transform 0.4s ease;
+}
+
+.product-card:hover .quick-view-overlay button {
+  transform: translateY(0);
+}
+
+/* Styling the Swiper Arrows inside the Modal */
+.quickview-swiper .swiper-button-next,
+.quickview-swiper .swiper-button-prev {
+  color: var(--primary-green) !important;
+  transform: scale(0.6); /* Make them smaller for the modal */
+}
+
+.quickview-swiper .swiper-pagination-bullet-active {
+  background: var(--primary-green) !important;
 }
 
 .section-title {
