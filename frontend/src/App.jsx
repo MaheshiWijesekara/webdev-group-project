@@ -13,6 +13,7 @@ import Stores from "./Components/Pages/Stores";
 import Blog from "./Components/Pages/Blog";
 import Contact from "./Components/Pages/Contact";
 import Profile from "./Components/Pages/Profile";
+import Admin from "./Components/Pages/Admin";
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/admin-virelle-hidden" element={<Admin />} />
       </Routes>
       
       <Footer />

@@ -161,6 +161,16 @@ const Nav = () => {
                                         </span>
                                         <ul className="dropdown-menu border-0 shadow-sm">
                                             <li><Link className="dropdown-item" to="/profile">My Account</Link></li>
+                                            {user && user.role === 'admin' && (
+        <>
+            <li><hr className="dropdown-divider"/></li>
+            <li>
+                <Link className="dropdown-item fw-bold text-danger" to="/admin-virelle-hidden">
+                    <i className="bi bi-speedometer2 me-2"></i>ADMIN PANEL
+                </Link>
+            </li>
+        </>
+    )}
                                             <li><hr className="dropdown-divider"/></li>
                                             <li><button className="dropdown-item" onClick={logout}>Logout</button></li>
                                         </ul>
