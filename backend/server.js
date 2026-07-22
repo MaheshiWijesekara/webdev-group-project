@@ -36,7 +36,7 @@ app.use('/uploads', express.static('uploads'));
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',      
-    password: 'amti@1362', 
+    password: '', 
     database: 'virelle_db'
 });
 
