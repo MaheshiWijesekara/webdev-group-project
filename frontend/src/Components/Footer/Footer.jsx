@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 import payment1 from './../../assets/payment-1.svg';
 import payment2 from './../../assets/payment-2.svg';
@@ -9,6 +11,24 @@ import payment7 from './../../assets/payment-6.svg';
 
 
 function Footer() {
+
+    const [email, setEmail] = useState("");
+
+    const handleSubscribe = async (e) => {
+        e.preventDefault(); // Prevents page reload
+
+        if (!email) return toast.error("Please enter an email address");
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/subscribe', { email });
+            toast.success(response.data.message);
+            setEmail(""); // Clear the input box after success
+        } catch (err) {
+            // Shows the "Already Subscribed" or "Database Error" message from backend
+            toast.error(err.response?.data?.error || "Subscription failed");
+        }
+    };
+
   return (
     <>
       <div className="footer mt-5 py-5">
@@ -68,10 +88,18 @@ function Footer() {
                 <div className="col-lg-4">
                     <h3 className="mb-4">Subscribe to our newsletter</h3>
                     <p className="mb-5">Enter your email to get the latest news, updates and special offers delivered directly in your inbox</p>
-                    <div className="subscribe-box d-flex">
-                        <input type="email" className="form-control" placeholder='Enter your email address' />
-                        <button className="btn">Subscribe</button>
-                    </div>
+                    {/* Wrapped in a form to trigger handleSubscribe on Enter key or button click */}
+                    <form className="subscribe-box d-flex" onSubmit={handleSubscribe}>
+                        <input 
+                            type="email" 
+                            className="form-control" 
+                            placeholder='Enter your email address' 
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                        <button type="submit" className="btn">Subscribe</button>
+                    </form>
                 </div>
             </div>
 
@@ -113,4 +141,4 @@ function Footer() {
   )
 }
 
-export default Footer
+export default Footer;

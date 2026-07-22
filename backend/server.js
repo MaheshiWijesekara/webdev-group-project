@@ -115,19 +115,27 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// 3. User Login
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     db.query("SELECT * FROM users WHERE email = ?", [email], async (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (results.length === 0) return res.status(404).json({ error: "User not found" });
+        if (err || results.length === 0) return res.status(404).json({ error: "User not found" });
         
         const user = results[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ error: "Wrong password" });
 
         const token = jwt.sign({ id: user.id, name: user.name }, SECRET_KEY, { expiresIn: '1d' });
-        res.json({ token, user: { id: user.id, name: user.name } });
+        
+        // --- ADD THE ROLE HERE ---
+        res.json({ 
+            token, 
+            user: { 
+                id: user.id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role // This sends 'admin' or 'user'
+            } 
+        });
     });
 });
 
@@ -302,6 +310,72 @@ app.put('/api/user/password', async (req, res) => {
     db.query("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, id], (err, result) => {
         if (err) return res.status(500).json(err);
         res.json({ message: "Password changed!" });
+    });
+});
+
+// Newsletter Subscription Route
+app.post('/api/subscribe', (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+    }
+
+    const sql = "INSERT INTO subscribers (email) VALUES (?)";
+    db.query(sql, [email], (err, result) => {
+        if (err) {
+            // Check if the error is because the email already exists
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ error: "You are already subscribed to our newsletter!" });
+            }
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({ message: "Thank you for subscribing to Virelle!" });
+    });
+});
+
+// 1. Get Admin Stats (Total Users & Total Sales)
+app.get('/api/admin/stats', (req, res) => {
+    const userCountSql = "SELECT COUNT(*) as totalUsers FROM users";
+    const salesSql = "SELECT SUM(total_amount) as totalSales FROM orders";
+    
+    db.query(userCountSql, (err, userRes) => {
+        if (err) return res.status(500).json(err);
+        db.query(salesSql, (err, salesRes) => {
+            if (err) return res.status(500).json(err);
+            res.json({
+                totalUsers: userRes[0].totalUsers,
+                totalSales: salesRes[0].totalSales || 0
+            });
+        });
+    });
+});
+
+// 2. Get All Orders (For Admin to manage)
+app.get('/api/admin/orders', (req, res) => {
+    const sql = "SELECT * FROM orders ORDER BY order_date DESC";
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// 3. Update Order Status (Processing -> Shipped -> Delivered)
+app.put('/api/admin/orders/:id', (req, res) => {
+    const { status } = req.body;
+    const sql = "UPDATE orders SET status = ? WHERE id = ?";
+    db.query(sql, [status, req.params.id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Status updated" });
+    });
+});
+
+// 4. DELETE Product (The 'D' in CRUD)
+app.delete('/api/products/:id', (req, res) => {
+    const sql = "DELETE FROM products WHERE id = ?";
+    db.query(sql, [req.params.id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Product deleted" });
     });
 });
 
