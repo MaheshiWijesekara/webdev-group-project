@@ -34,10 +34,11 @@ app.use('/uploads', express.static('uploads'));
 
 // --- DATABASE CONNECTION ---
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',      
-    password: '', 
-    database: 'virelle_db'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306 // It uses the .env port, or defaults to 3306
 });
 
 db.connect(err => {
