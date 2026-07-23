@@ -711,6 +711,29 @@ CREATE TABLE orders (
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TABLE orders;
+
+-- 1. Main Order Table
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL, 
+    customer_email VARCHAR(255) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Processing',
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Individual Items inside those orders
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    product_pname VARCHAR(255) NOT NULL,
+    price_at_purchase DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
+
 SELECT * FROM orders;
 
 CREATE TABLE reviews (
@@ -750,6 +773,8 @@ CREATE TABLE order_items (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
+DROP TABLE order_items;
+
 SELECT * FROM users;
 
 CREATE TABLE subscribers (
@@ -765,7 +790,14 @@ ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user';
 
 -- 2. Make YOUR account the admin
 -- Replace 'azadtahira14@gmail.com' with the email you used to register
-UPDATE users SET role = 'admin' WHERE email = 'maheshi@gmail.com';
+UPDATE users SET role = 'admin' WHERE email = 'admin@gmail.com';
 
+DELETE FROM users WHERE id = 2;
 
+SELECT * FROM products;
+
+UPDATE products SET price = '5000' WHERE id = 1;
+
+SELECT * FROM orders;
+SELECT * FROM order_items;
 

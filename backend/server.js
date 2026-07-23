@@ -13,7 +13,6 @@ const app = express();
 // --- MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
-// Added urlencoded for handling FormData properly
 app.use(express.urlencoded({ extended: true }));
 
 // --- MULTER SETUP ---
@@ -22,14 +21,11 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/'); 
     },
     filename: (req, file, cb) => {
-        // Renaming to avoid name conflicts
         cb(null, Date.now() + path.extname(file.originalname)); 
     }
 });
 
 const upload = multer({ storage: storage });
-
-// Make the 'uploads' folder public
 app.use('/uploads', express.static('uploads'));
 
 // --- DATABASE CONNECTION ---
@@ -38,7 +34,7 @@ const db = mysql.createConnection({
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306 // It uses the .env port, or defaults to 3306
+    port: process.env.DB_PORT || 3306 
 });
 
 db.connect(err => {
@@ -49,19 +45,21 @@ db.connect(err => {
     }
 });
 
-// --- ROUTES ---
+// --- PRODUCTS ROUTES ---
 
+// DOOR 1: GET ALL PRODUCTS (Used by Shop and Admin)
+// This version handles SEARCH, PAGINATION, CATEGORY, and LIMIT
 app.get('/api/products', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const search = req.query.search || '';
+    const limit = parseInt(req.query.limit) || 8; // FIXED: Now correctly reads from the URL
     const category = req.query.category || 'all';
     const availability = req.query.availability || 'all';
     const sortBy = req.query.sortBy || 'default';
     
-    const limit = 8;
     const offset = (page - 1) * limit;
 
-    // 1. Build Dynamic SQL Query
+    // 1. Build the Query
     let query = "FROM products WHERE pname LIKE ?";
     let params = [`%${search}%`];
 
@@ -79,9 +77,9 @@ app.get('/api/products', (req, res) => {
     if (sortBy === 'New') sortSql = " ORDER BY id DESC";
     else if (sortBy === 'Sale') sortSql = " AND tag = 'Sale'";
 
-    // 3. Final Queries
-    const dataSql = "SELECT * " + query + sortSql + " LIMIT ? OFFSET ?";
-    const countSql = "SELECT COUNT(*) as total " + query;
+    // 3. Final SQL with LIMIT and OFFSET
+    const dataSql = `SELECT * ${query} ${sortSql} LIMIT ? OFFSET ?`;
+    const countSql = `SELECT COUNT(*) as total ${query}`;
 
     db.query(dataSql, [...params, limit, offset], (err, products) => {
         if (err) return res.status(500).json(err);
@@ -101,7 +99,17 @@ app.get('/api/products', (req, res) => {
     });
 });
 
-// 2. User Registration
+// DOOR 2: GET ONE PRODUCT (Used by ProductDetails)
+app.get('/api/products/:id', (req, res) => {
+    const sql = "SELECT * FROM products WHERE id = ?";
+    db.query(sql, [req.params.id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json(result[0]); 
+    });
+});
+
+// --- USER AUTH ROUTES ---
+
 app.post('/api/register', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -120,43 +128,30 @@ app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
     db.query("SELECT * FROM users WHERE email = ?", [email], async (err, results) => {
         if (err || results.length === 0) return res.status(404).json({ error: "User not found" });
-        
         const user = results[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ error: "Wrong password" });
-
         const token = jwt.sign({ id: user.id, name: user.name }, SECRET_KEY, { expiresIn: '1d' });
-        
-        // --- ADD THE ROLE HERE ---
         res.json({ 
             token, 
-            user: { 
-                id: user.id, 
-                name: user.name, 
-                email: user.email, 
-                role: user.role // This sends 'admin' or 'user'
-            } 
+            user: { id: user.id, name: user.name, email: user.email, role: user.role } 
         });
     });
 });
 
-// 4. Cart Add (Hybrid: Save to DB)
+// --- CART ROUTES ---
+
 app.post('/api/cart/add', (req, res) => {
     const { userId, productId, quantity } = req.body;
-    
-    // This SQL checks if the product is already in the user's cart
     const checkSql = "SELECT * FROM cart WHERE user_id = ? AND product_id = ?";
-    
     db.query(checkSql, [userId, productId], (err, results) => {
         if (results.length > 0) {
-            // If it exists, UPDATE the quantity
             const updateSql = "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?";
             db.query(updateSql, [quantity, userId, productId], (err, result) => {
                 if (err) return res.status(500).json(err);
                 res.json({ message: "Quantity updated" });
             });
         } else {
-            // If it doesn't exist, INSERT new row
             const insertSql = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
             db.query(insertSql, [userId, productId, quantity], (err, result) => {
                 if (err) return res.status(500).json(err);
@@ -166,55 +161,14 @@ app.post('/api/cart/add', (req, res) => {
     });
 });
 
-// 5. Get all blogs
-app.get('/api/blogs', (req, res) => {
-    const sql = "SELECT * FROM blogs ORDER BY id DESC";
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
+app.get('/api/cart/:userId', (req, res) => {
+    const sql = `SELECT products.*, cart.quantity FROM cart JOIN products ON cart.product_id = products.id WHERE cart.user_id = ?`;
+    db.query(sql, [req.params.userId], (err, results) => {
+        if (err) return res.status(500).json(err);
         res.json(results);
     });
 });
 
-// 6. Post a new blog (WITH IMAGE UPLOAD)
-app.post('/api/blogs', upload.single('image'), (req, res) => {
-    const { name, title, author } = req.body;
-    const date = new Date().toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-    });
-    
-    // Path to be saved in the database
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-
-    // Check if essential fields are missing
-    if (!name || !title) {
-        return res.status(400).json({ error: "Headline and Category are required" });
-    }
-
-    const sql = "INSERT INTO blogs (name, title, image, author, date) VALUES (?, ?, ?, ?, ?)";
-    
-    db.query(sql, [name, title, imagePath, author, date], (err, result) => {
-        if (err) {
-            // This logs the SPECIFIC SQL error to your terminal window
-            console.error("SQL INSERT ERROR:", err); 
-            return res.status(500).json({ error: "Database error: " + err.message });
-        }
-        res.status(201).json({ message: "Blog posted successfully!" });
-    });
-});
-
-// 1. Place Order Route
-app.post('/api/orders', (req, res) => {
-    const { userId, email, total } = req.body;
-    const sql = "INSERT INTO orders (user_id, customer_email, total_amount) VALUES (?, ?, ?)";
-    db.query(sql, [userId, email, total], (err, result) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Order stored!" });
-    });
-});
-
-// 2. Clear Cart Route (When order is finished)
 app.delete('/api/cart/clear/:userId', (req, res) => {
     const sql = "DELETE FROM cart WHERE user_id = ?";
     db.query(sql, [req.params.userId], (err, result) => {
@@ -223,62 +177,108 @@ app.delete('/api/cart/clear/:userId', (req, res) => {
     });
 });
 
-app.get('/api/cart/:userId', (req, res) => {
-    const userId = req.params.userId;
-    // We use a JOIN to get the product details along with the cart quantity
-    const sql = `
-        SELECT products.*, cart.quantity 
-        FROM cart 
-        JOIN products ON cart.product_id = products.id 
-        WHERE cart.user_id = ?`;
+// --- BLOG ROUTES ---
 
-    db.query(sql, [userId], (err, results) => {
+app.get('/api/blogs', (req, res) => {
+    const sql = "SELECT * FROM blogs ORDER BY id DESC";
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+app.post('/api/blogs', upload.single('image'), (req, res) => {
+    const { name, title, author } = req.body;
+    const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!name || !title) return res.status(400).json({ error: "Headline and Category are required" });
+    const sql = "INSERT INTO blogs (name, title, image, author, date) VALUES (?, ?, ?, ?, ?)";
+    db.query(sql, [name, title, imagePath, author, date], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(201).json({ message: "Blog posted successfully!" });
+    });
+});
+
+// --- ORDER ROUTES ---
+
+app.post('/api/orders', (req, res) => {
+    const { userId, email, total, items } = req.body;
+
+    // 1. First, create the main record in the 'orders' table
+    const orderSql = "INSERT INTO orders (user_id, customer_email, total_amount) VALUES (?, ?, ?)";
+    
+    db.query(orderSql, [userId, email, total], (err, result) => {
+        if (err) {
+            console.error("Order Insert Error:", err);
+            return res.status(500).json({ error: "Failed to create order" });
+        }
+
+        // 2. Get the ID of the order we just created
+        const orderId = result.insertId;
+
+        // 3. Prepare the items for insertion
+        // We create an array of arrays: [[orderId, prodId, name, price, qty], [...]]
+        const itemValues = items.map(item => [
+            orderId, 
+            item.id, 
+            item.pname || item.name, 
+            parseFloat(item.price.toString().replace("Rs.", "").replace(",", "")), 
+            item.quantity
+        ]);
+
+        // 4. Insert all items at once into the 'order_items' table
+        const itemsSql = "INSERT INTO order_items (order_id, product_id, product_pname, price_at_purchase, quantity) VALUES ?";
+        
+        db.query(itemsSql, [itemValues], (err, itemResult) => {
+            if (err) {
+                console.error("Items Insert Error:", err);
+                return res.status(500).json({ error: "Order created but items failed to save" });
+            }
+
+            res.status(201).json({ 
+                message: "Order placed successfully!", 
+                orderId: orderId 
+            });
+        });
+    });
+});
+
+app.get('/api/order-details/:orderId', (req, res) => {
+    const sql = "SELECT * FROM order_items WHERE order_id = ?";
+    db.query(sql, [req.params.orderId], (err, results) => {
         if (err) return res.status(500).json(err);
         res.json(results);
     });
 });
 
-app.get('/api/products/:id', (req, res) => {
-    const sql = "SELECT * FROM products WHERE id = ?";
-    db.query(sql, [req.params.id], (err, result) => {
+app.get('/api/orders/:userId', (req, res) => {
+    const sql = "SELECT id, total_amount, status, order_date FROM orders WHERE user_id = ? ORDER BY order_date DESC";
+    db.query(sql, [req.params.userId], (err, results) => {
         if (err) return res.status(500).json(err);
-        res.json(result[0]); // Send only the first result (the specific product)
+        res.json(results);
     });
 });
-// 1. GET reviews
-app.get('/api/reviews/:productId', (req, res) => {
-    // Changed table name to product_reviews
-    const sql = `
-        SELECT product_reviews.*, users.name as user_name 
-        FROM product_reviews 
-        JOIN users ON product_reviews.user_id = users.id 
-        WHERE product_reviews.product_id = ? 
-        ORDER BY product_reviews.review_date DESC`;
 
+// --- REVIEW ROUTES ---
+
+app.get('/api/reviews/:productId', (req, res) => {
+    const sql = `SELECT product_reviews.*, users.name as user_name FROM product_reviews JOIN users ON product_reviews.user_id = users.id WHERE product_reviews.product_id = ? ORDER BY product_reviews.review_date DESC`;
     db.query(sql, [req.params.productId], (err, results) => {
         if (err) return res.status(500).json(err);
         res.json(results);
     });
 });
 
-// 2. POST review
 app.post('/api/reviews', (req, res) => {
     const { userId, productId, comment, rating } = req.body;
-    // Changed table name to product_reviews
     const sql = "INSERT INTO product_reviews (user_id, product_id, comment, rating) VALUES (?, ?, ?, ?)";
-    
     db.query(sql, [userId, productId, comment, rating], (err, result) => {
-        if (err) {
-            console.error("DB Error:", err);
-            return res.status(500).json(err);
-        }
+        if (err) return res.status(500).json(err);
         res.status(201).json({ message: "Review added!" });
     });
 });
 
-// 3. DELETE a review (To prove you can handle the 'D' in CRUD)
 app.delete('/api/reviews/:id', (req, res) => {
-    // Changed table name to product_reviews
     const sql = "DELETE FROM product_reviews WHERE id = ?";
     db.query(sql, [req.params.id], (err, result) => {
         if (err) return res.status(500).json(err);
@@ -286,16 +286,8 @@ app.delete('/api/reviews/:id', (req, res) => {
     });
 });
 
-// 1. Get Order History for a specific user
-app.get('/api/orders/:userId', (req, res) => {
-    const sql = "SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC";
-    db.query(sql, [req.params.userId], (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
-    });
-});
+// --- ADMIN & OTHER ROUTES ---
 
-// 2. Update User Profile Name
 app.put('/api/user/update', (req, res) => {
     const { id, name } = req.body;
     db.query("UPDATE users SET name = ? WHERE id = ?", [name, id], (err, result) => {
@@ -304,55 +296,30 @@ app.put('/api/user/update', (req, res) => {
     });
 });
 
-// 3. Update Password (Security)
-app.put('/api/user/password', async (req, res) => {
-    const { id, newPassword } = req.body;
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    db.query("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, id], (err, result) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Password changed!" });
-    });
-});
-
-// Newsletter Subscription Route
 app.post('/api/subscribe', (req, res) => {
     const { email } = req.body;
-
-    if (!email) {
-        return res.status(400).json({ error: "Email is required" });
-    }
-
     const sql = "INSERT INTO subscribers (email) VALUES (?)";
     db.query(sql, [email], (err, result) => {
         if (err) {
-            // Check if the error is because the email already exists
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ error: "You are already subscribed to our newsletter!" });
-            }
+            if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: "Already subscribed!" });
             return res.status(500).json({ error: err.message });
         }
-        res.status(201).json({ message: "Thank you for subscribing to Virelle!" });
+        res.status(201).json({ message: "Subscribed!" });
     });
 });
 
-// 1. Get Admin Stats (Total Users & Total Sales)
 app.get('/api/admin/stats', (req, res) => {
     const userCountSql = "SELECT COUNT(*) as totalUsers FROM users";
     const salesSql = "SELECT SUM(total_amount) as totalSales FROM orders";
-    
     db.query(userCountSql, (err, userRes) => {
         if (err) return res.status(500).json(err);
         db.query(salesSql, (err, salesRes) => {
             if (err) return res.status(500).json(err);
-            res.json({
-                totalUsers: userRes[0].totalUsers,
-                totalSales: salesRes[0].totalSales || 0
-            });
+            res.json({ totalUsers: userRes[0].totalUsers, totalSales: salesRes[0].totalSales || 0 });
         });
     });
 });
 
-// 2. Get All Orders (For Admin to manage)
 app.get('/api/admin/orders', (req, res) => {
     const sql = "SELECT * FROM orders ORDER BY order_date DESC";
     db.query(sql, (err, results) => {
@@ -361,7 +328,6 @@ app.get('/api/admin/orders', (req, res) => {
     });
 });
 
-// 3. Update Order Status (Processing -> Shipped -> Delivered)
 app.put('/api/admin/orders/:id', (req, res) => {
     const { status } = req.body;
     const sql = "UPDATE orders SET status = ? WHERE id = ?";
@@ -371,7 +337,6 @@ app.put('/api/admin/orders/:id', (req, res) => {
     });
 });
 
-// 4. DELETE Product (The 'D' in CRUD)
 app.delete('/api/products/:id', (req, res) => {
     const sql = "DELETE FROM products WHERE id = ?";
     db.query(sql, [req.params.id], (err, result) => {
@@ -380,6 +345,43 @@ app.delete('/api/products/:id', (req, res) => {
     });
 });
 
-// Start Server
+// POST route to Add a New Product (WITH 2 IMAGES)
+app.post('/api/products', upload.fields([
+    { name: 'image', maxCount: 1 }, 
+    { name: 'secondImage', maxCount: 1 }
+]), (req, res) => {
+    const { pname, pdescription, price, tag, category, subcategory, rating, availability } = req.body;
+    
+    // Get file paths from Multer
+    const imagePath = req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : null;
+    const secondImagePath = req.files['secondImage'] ? `/uploads/${req.files['secondImage'][0].filename}` : null;
+
+    const sql = `INSERT INTO products 
+        (image, secondImage, pname, pdescription, price, tag, category, subcategory, rating, availability) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [
+        imagePath, 
+        secondImagePath, 
+        pname, 
+        pdescription, 
+        price, 
+        tag, 
+        category, 
+        subcategory, 
+        rating || 5, 
+        availability || 'In'
+    ];
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            console.error("Insert Error:", err);
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({ message: "Product added successfully!" });
+    });
+});
+
+// START SERVER
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
