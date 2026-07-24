@@ -2,17 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation } from "swiper/modules";
 import React, { useState, useEffect } from "react"; 
-// Toastify
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/effect-fade";
-
-// data - MAKE SURE THIS PATH IS EXACTLY CORRECT
-// import Products from "./../../Products.json";
 
 import subBanner1 from "./../../assets/banner-1.webp";
 import subBanner2 from "./../../assets/banner-2.webp";
@@ -39,7 +34,7 @@ import socialImage5 from "./../../assets/social-image-5.jpg";
 
 function Index() {
   const navigate = useNavigate();
-  const [products, setProducts] = useState([]); // Start with an empty array
+  const [products, setProducts] = useState([]);
 
   const addToWishlist = (product) => {
     try {
@@ -75,15 +70,14 @@ function Index() {
     }
   };
 
- useEffect(() => {
+  useEffect(() => {
     fetch('http://localhost:5000/api/products')
         .then(response => response.json())
         .then(data => {
-            // Check if data.products exists (because of your new backend format)
             if (data && data.products) {
                 setProducts(data.products); 
             } else {
-                setProducts(data); // Fallback if backend isn't paginated
+                setProducts(data);
             }
         })
         .catch(err => console.log("Error fetching data:", err));
@@ -148,12 +142,25 @@ function Index() {
         </Swiper>
       </div>
 
-      {/* Products Section */}
+      {/* Featured Products Section */}
       <div className="product-container my-5 py-5">
         <div className="container position-relative">
           <div className="section-title mb-5 text-center">
-            <h2 className="fw-semibold fs-1">Featured Products</h2>
-            <p className="text-muted">Get the skin you've always wanted</p>
+            <span className="d-inline-block mb-2" style={{
+              color: '#B4975A',
+              fontSize: '0.7rem',
+              letterSpacing: '4px',
+              textTransform: 'uppercase',
+              fontWeight: '600'
+            }}>
+              Our Collection
+            </span>
+            <h2 className="fw-semibold fs-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>
+              Featured Products
+            </h2>
+            <p className="text-muted" style={{ fontSize: '1.1rem' }}>
+              Get the skin you've always wanted
+            </p>
           </div>
 
           <Swiper
@@ -167,13 +174,16 @@ function Index() {
               0: { slidesPerView: 1 },
             }}
           >
-            {/* SAFE FILTER: Convert ID to Number to ensure comparison works */}
             {Array.isArray(products) && products.filter(
-  (p) => Number(p.id) >= 1 && Number(p.id) <= 10,
-).map((product) => (
+              (p) => Number(p.id) >= 1 && Number(p.id) <= 10,
+            ).map((product) => (
               <SwiperSlide key={product.id}>
                 <div className="product-item text-center">
-                  <div className="product-image overflow-hidden position-relative">
+                  <div className="product-image overflow-hidden position-relative" style={{
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    backgroundColor: '#f8f9fa'
+                  }}>
                     <img
                       src={product.image}
                       className="img-fluid"
@@ -206,8 +216,8 @@ function Index() {
                     className="text-decoration-none text-dark"
                   >
                     <div className="product-content pt-3">
-                      <span className="d-block fw-bold">{product.price}</span>
-                      <h3 className="fs-6 mt-1">{product.pname}</h3>
+                      <span className="d-block fw-bold" style={{ color: '#2D402E' }}>{product.price}</span>
+                      <h3 className="fs-6 mt-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>{product.pname}</h3>
                     </div>
                   </Link>
                 </div>
@@ -217,34 +227,34 @@ function Index() {
         </div>
       </div>
 
-      {/* banner */}
-
+      {/* Banner Section */}
       <div className="banners py-5">
         <div className="container">
-          <div className="row">
+          <div className="row g-4">
             <div className="col-lg-6 banner-card overflow-hidden position-relative">
               <img
                 src={subBanner1}
                 alt="banner"
                 className="img-fluid rounded banner-img"
+                style={{ borderRadius: '12px' }}
               />
               <div className="banner-content position-absolute">
                 <h3>NEW COLLECTION</h3>
                 <h1>
                   Intensive Glow C+ <br /> Serum
-                  <br />
                 </h1>
                 <button className="btn banner-btn mt-2">
                   EXPLORE MORE
-                  </button>
+                </button>
               </div>
             </div>
 
-            <div className="col-lg-6 banner-card overflow-hidden position-relative banner-mt">
+            <div className="col-lg-6 banner-card overflow-hidden position-relative">
               <img
                 src={subBanner2}
                 alt="banner"
                 className="img-fluid rounded banner-img"
+                style={{ borderRadius: '12px' }}
               />
               <div className="banner-content banner-content2 position-absolute">
                 <h1>25% off everything</h1>
@@ -252,7 +262,6 @@ function Index() {
                   Makeup with extended range in <br /> colors for every skin
                   tone
                 </p>
-                <br />
                 <button className="btn banner-btn mt-2">SHOP NOW</button>
               </div>
             </div>
@@ -260,104 +269,207 @@ function Index() {
         </div>
       </div>
 
-      {/* services */}
-
+      {/* Services Section */}
       <div className="container my-5 py-5">
-        <div className="row text-center">
+        <div className="row text-center g-4">
           <div className="col-lg-3 col-sm-6 mb-4">
-            <img src={serviceImg1} alt="" className="img-fluid" />
-            <h4 className="mt-3 mb-1">Free Shipping</h4>
-            <p className="text-muted fs-6 fw-semibold">
-              Free shipping on orders over $130
-            </p>
+            <div style={{
+              padding: '20px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              <img src={serviceImg1} alt="" className="img-fluid" style={{ marginBottom: '15px' }} />
+              <h4 className="mt-3 mb-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>Free Shipping</h4>
+              <p className="text-muted fs-6 fw-semibold">
+                Free shipping on orders over $130
+              </p>
+            </div>
           </div>
           <div className="col-lg-3 col-sm-6 mb-4">
-            <img src={serviceImg2} alt="" className="img-fluid" />
-            <h4 className="mt-3 mb-1">Returns</h4>
-            <p className="text-muted fs-6 fw-semibold">
-              Within 30 days for an exchange
-            </p>
+            <div style={{
+              padding: '20px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              <img src={serviceImg2} alt="" className="img-fluid" style={{ marginBottom: '15px' }} />
+              <h4 className="mt-3 mb-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>Easy Returns</h4>
+              <p className="text-muted fs-6 fw-semibold">
+                Within 30 days for an exchange
+              </p>
+            </div>
           </div>
           <div className="col-lg-3 col-sm-6 mb-4">
-            <img src={serviceImg3} alt="" className="img-fluid" />
-            <h4 className="mt-3 mb-1">Online Support</h4>
-            <p className="text-muted fs-6 fw-semibold">
-              24 hours, 7 days a week
-            </p>
+            <div style={{
+              padding: '20px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              <img src={serviceImg3} alt="" className="img-fluid" style={{ marginBottom: '15px' }} />
+              <h4 className="mt-3 mb-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>24/7 Support</h4>
+              <p className="text-muted fs-6 fw-semibold">
+                24 hours, 7 days a week
+              </p>
+            </div>
           </div>
           <div className="col-lg-3 col-sm-6 mb-4">
-            <img src={serviceImg4} alt="" className="img-fluid" />
-            <h4 className="mt-3 mb-1">Flexible Payment</h4>
-            <p className="text-muted fs-6 fw-semibold">
-              Pay with multiple credit cards
-            </p>
+            <div style={{
+              padding: '20px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+              <img src={serviceImg4} alt="" className="img-fluid" style={{ marginBottom: '15px' }} />
+              <h4 className="mt-3 mb-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>Flexible Payment</h4>
+              <p className="text-muted fs-6 fw-semibold">
+                Pay with multiple credit cards
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* seen in */}
-
-      <div className="text-center my-5 seen-in">
+      {/* Testimonials Section */}
+      <div className="text-center my-5 py-4" style={{ backgroundColor: 'white' }}>
         <div className="container">
-          <h1 className="mb-5 fw-semibold">As seen in</h1>
-          <div className="row pt-3 justify-content-center">
-            <div className="col-md-4 mb-4 seen-card">
-              <img src={brand1} alt="" className="img-fluid" />
-              <p className="text-dark fs-5 mt-2 fw-semibold">
-                "Also the customer service is phenomenal. I would recommend this
-                company to anyone."
-              </p>
+          <span className="d-inline-block mb-3" style={{
+            color: '#B4975A',
+            fontSize: '0.7rem',
+            letterSpacing: '4px',
+            textTransform: 'uppercase',
+            fontWeight: '600'
+          }}>
+            Testimonials
+          </span>
+          <h1 className="mb-5 fw-semibold" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>As seen in</h1>
+          <div className="row pt-3 justify-content-center g-4">
+            <div className="col-md-4 mb-4">
+              <div style={{
+                padding: '30px',
+                backgroundColor: '#F9F7F2',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                <img src={brand1} alt="" className="img-fluid mb-3" />
+                <p className="text-dark fs-5 mt-2 fw-semibold" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>
+                  "Also the customer service is phenomenal. I would recommend this
+                  company to anyone."
+                </p>
+              </div>
             </div>
-            <div className="col-md-4 mb-4 seen-card">
-              <img src={brand2} alt="" className="img-fluid" />
-              <p className="text-dark fs-5 mt-2 fw-semibold">
-                "Great product and service. Very happy with my purchase."
-              </p>
+            <div className="col-md-4 mb-4">
+              <div style={{
+                padding: '30px',
+                backgroundColor: '#F9F7F2',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                <img src={brand2} alt="" className="img-fluid mb-3" />
+                <p className="text-dark fs-5 mt-2 fw-semibold" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>
+                  "Great product and service. Very happy with my purchase."
+                </p>
+              </div>
             </div>
-            <div className="col-md-4 mb-4 seen-card">
-              <img src={brand3} alt="" className="img-fluid" />
-              <p className="text-dark fs-5 mt-2 fw-semibold">
-                "Are you looking for the best beauty products? You've come to
-                the right place."
-              </p>
+            <div className="col-md-4 mb-4">
+              <div style={{
+                padding: '30px',
+                backgroundColor: '#F9F7F2',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}>
+                <img src={brand3} alt="" className="img-fluid mb-3" />
+                <p className="text-dark fs-5 mt-2 fw-semibold" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>
+                  "Are you looking for the best beauty products? You've come to
+                  the right place."
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* favorites */}
+      {/* Customer Favorites */}
       <div className="favourite-beauty py-5 my-5">
         <div className="container">
-          <div className="row">
-            <div className="section-title mb-5 favourite-beauty-title text-center">
-              <h2 className="fw-semibold fs-1">Customer Favorites</h2>
-              <p>
-                Made using clean, non-toxic ingredients, our products are
-                designed for everyone
-              </p>
-            </div>
+          <div className="section-title mb-5 favourite-beauty-title text-center">
+            <span className="d-inline-block mb-2" style={{
+              color: '#B4975A',
+              fontSize: '0.7rem',
+              letterSpacing: '4px',
+              textTransform: 'uppercase',
+              fontWeight: '600'
+            }}>
+              Top Picks
+            </span>
+            <h2 className="fw-semibold fs-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>
+              Customer Favorites
+            </h2>
+            <p className="text-muted" style={{ fontSize: '1.1rem' }}>
+              Made using clean, non-toxic ingredients, our products are designed for everyone
+            </p>
           </div>
 
-          <div className="row">
+          <div className="row g-4">
             <div className="col-lg-5">
-              <div className="favourite-beauty-banner mb-lg-0 mb-5 position-relative">
+              <div className="favourite-beauty-banner mb-lg-0 mb-5 position-relative" style={{
+                borderRadius: '12px',
+                overflow: 'hidden'
+              }}>
                 <img src={femalebanner} className="img-fluid" alt="" />
                 <div className="favourite-beauty-banner-title">
-                  <h3 className="fs-2">Empower Yourself</h3>
+                  <h3 className="fs-2" style={{ fontFamily: 'Playfair Display, serif' }}>Empower Yourself</h3>
                   <p className="fs-6">Get the skin you deserve</p>
-                  <button className="btn btn-default">Explore</button>
+                  <button className="btn" style={{
+                    backgroundColor: '#B4975A',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 30px',
+                    borderRadius: '8px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#2D402E'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#B4975A'}>
+                    Explore
+                  </button>
                 </div>
               </div>
             </div>
 
             <div className="col-lg-7">
-              <div className="row">
+              <div className="row g-3">
                 {Array.isArray(products) && products.filter(
-  (p) => p.category === 'Skin' // Or whatever category you have in your DB
-).slice(0, 6).map((product) => (
-                  <div key={product.id} className="col-md-4 col-6 mb-4">
-                    <div className="product-item text-center h-100 shadow-sm p-2 rounded">
-                      <div className="product-image overflow-hidden position-relative">
+                  (p) => p.category === 'Skin'
+                ).slice(0, 6).map((product) => (
+                  <div key={product.id} className="col-md-4 col-6 mb-3">
+                    <div className="product-item text-center h-100" style={{
+                      backgroundColor: 'white',
+                      borderRadius: '12px',
+                      padding: '15px',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.06)',
+                      border: '1px solid rgba(45,64,46,0.06)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-5px)';
+                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.06)';
+                    }}>
+                      <div className="product-image overflow-hidden position-relative" style={{
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        backgroundColor: '#f8f9fa'
+                      }}>
                         <img
                           src={product.image}
                           className="img-fluid"
@@ -370,7 +482,6 @@ function Index() {
                         />
 
                         <div className="product-icons d-flex gap-2">
-                          
                           <div
                             className="product-icon"
                             onClick={() => addToCart(product)}
@@ -385,10 +496,10 @@ function Index() {
                         className="text-decoration-none text-dark"
                       >
                         <div className="product-content pt-3">
-                          <span className="d-block fw-bold">
+                          <span className="d-block fw-bold" style={{ color: '#2D402E' }}>
                             {product.price}
                           </span>
-                          <h3 className="fs-6 mt-1">{product.pname}</h3>
+                          <h3 className="fs-6 mt-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>{product.pname}</h3>
                         </div>
                       </Link>
                     </div>
@@ -400,78 +511,110 @@ function Index() {
         </div>
       </div>
 
-
-      {/* discover */}
-
-        <div className="discover container py-5">
-          <div className="section-title mb-5 favourite-beauty-title text-center">
-            <h2 className="fw-semibold fs-1">More to Discover</h2>
-            <p className="text-center">Our bundles were designed to conveniently package <br/> your tanning essentials while saving you money</p>
-          </div>
-          <div className="row g-5">
-            <div className="col-md-6 discover-card text-center">
-              <div className="discover-img section-image rounded">
-                <img src={discover1} alt="summer collection" className="img-fluid rounded" />
-              </div>
-              <div className="discover-info mt-3">
-                <div>Summer Collection</div>
-                <button className="btn mt-2">Shop now <i className="bi bi-arrow-right ms-2"></i></button>
-              </div>
+      {/* Discover Section */}
+      <div className="discover container py-5">
+        <div className="section-title mb-5 favourite-beauty-title text-center">
+          <span className="d-inline-block mb-2" style={{
+            color: '#B4975A',
+            fontSize: '0.7rem',
+            letterSpacing: '4px',
+            textTransform: 'uppercase',
+            fontWeight: '600'
+          }}>
+            Explore More
+          </span>
+          <h2 className="fw-semibold fs-1" style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E' }}>
+            More to Discover
+          </h2>
+          <p className="text-muted" style={{ fontSize: '1.1rem' }}>
+            Our bundles were designed to conveniently package <br /> your tanning essentials while saving you money
+          </p>
+        </div>
+        <div className="row g-4">
+          <div className="col-md-6 discover-card text-center">
+            <div className="discover-img section-image rounded" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <img src={discover1} alt="summer collection" className="img-fluid rounded" style={{ borderRadius: '12px' }} />
             </div>
-            <div className="col-md-6 discover-card text-center">
-              <div className="discover-img section-image rounded">
-                <img src={discover2} alt="from our blog" className="img-fluid rounded" />
-              </div>
-              <div className="discover-info mt-3">
-                <div>Summer Collection</div>
-                <button className="btn mt-2">Read our blog <i className="bi bi-arrow-right ms-2"></i></button>
-              </div>
+            <div className="discover-info mt-3">
+              <div style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E', fontSize: '1.8rem' }}>Summer Collection</div>
+              <button className="btn mt-2" style={{
+                backgroundColor: '#2D402E',
+                color: 'white',
+                border: 'none',
+                padding: '10px 30px',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#B4975A'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#2D402E'}>
+                Shop now <i className="bi bi-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+          <div className="col-md-6 discover-card text-center">
+            <div className="discover-img section-image rounded" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <img src={discover2} alt="from our blog" className="img-fluid rounded" style={{ borderRadius: '12px' }} />
+            </div>
+            <div className="discover-info mt-3">
+              <div style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E', fontSize: '1.8rem' }}>From Our Blog</div>
+              <button className="btn mt-2" style={{
+                backgroundColor: '#2D402E',
+                color: 'white',
+                border: 'none',
+                padding: '10px 30px',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#B4975A'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#2D402E'}>
+                Read our blog <i className="bi bi-arrow-right ms-2"></i>
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-
-        {/* social */}
-        <div className="social-image-container py-5 px-5 mx-auto">
-          <div className="row g-4">
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage1} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+      {/* Social Section */}
+      <div className="social-image-container py-5 px-5 mx-auto">
+        <div className="row g-3">
+          <div className="col-lg-2 col-md-4 col-6">
+            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
+              <img src={socialImage1} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage2} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-6">
+            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
+              <img src={socialImage2} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage3} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-6">
+            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
+              <img src={socialImage3} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage4} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-6">
+            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
+              <img src={socialImage4} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage5} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-6">
+            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
+              <img src={socialImage5} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage1} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 col-md-4 col-6">
+            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
+              <img src={socialImage1} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
           </div>
         </div>
+      </div>
 
       <ToastContainer
         position="top-right"

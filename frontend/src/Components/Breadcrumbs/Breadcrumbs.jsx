@@ -1,4 +1,4 @@
-// Components/Breadcrumbs/Breadcrumbs.jsx
+// Components/Breadcrumbs/Breadcrumbs.jsx - Super Compact Version
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -10,7 +10,6 @@ const Breadcrumbs = ({
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter(x => x);
 
-  // Define breadcrumb structures for all pages
   const getBreadcrumbStructure = () => {
     const currentPath = location.pathname;
 
@@ -64,13 +63,20 @@ const Breadcrumbs = ({
       ];
     }
 
+    // Stores: Home / Stores
+    if (currentPath === '/stores') {
+      return [
+        { name: 'Home', path: '/' },
+        { name: 'Stores', path: '/stores', isActive: true }
+      ];
+    }
+
     // Other pages: Home / Page Name
     if (pathnames.length === 1) {
       const nameMap = {
         'about': 'About',
         'blog': 'Blog',
         'contact': 'Contact',
-        'stores': 'Stores',
         'admin-virelle-hidden': 'Admin Panel'
       };
       
@@ -125,16 +131,16 @@ const Breadcrumbs = ({
       style={{ 
         backgroundColor: backgroundColor,
         paddingTop: paddingTop,
-        borderBottom: '1px solid rgba(45, 64, 46, 0.1)'
+        // REMOVED border-bottom for even more compact look
       }}
     >
-      <div className="container py-2">
+      <div className="container" style={{ padding: '4px 15px' }}> {/* EXTRA COMPACT */}
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb mb-0" style={{ 
-            fontSize: '0.85rem',
+            fontSize: '0.8rem',
             fontWeight: '500',
             margin: 0,
-            padding: '8px 0'
+            padding: '2px 0'
           }}>
             {breadcrumbs.map((item, index) => (
               <li 

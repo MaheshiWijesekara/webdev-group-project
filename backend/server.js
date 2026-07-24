@@ -179,6 +179,9 @@ app.delete('/api/cart/clear/:userId', (req, res) => {
 
 // --- BLOG ROUTES ---
 
+// --- BLOG ROUTES ---
+
+// GET all blogs
 app.get('/api/blogs', (req, res) => {
     const sql = "SELECT * FROM blogs ORDER BY id DESC";
     db.query(sql, (err, results) => {
@@ -187,17 +190,32 @@ app.get('/api/blogs', (req, res) => {
     });
 });
 
+// GET single blog by ID (for full content)
+app.get('/api/blogs/:id', (req, res) => {
+    const sql = "SELECT * FROM blogs WHERE id = ?";
+    db.query(sql, [req.params.id], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) return res.status(404).json({ error: "Blog not found" });
+        res.json(results[0]);
+    });
+});
+
+// POST new blog (with content)
 app.post('/api/blogs', upload.single('image'), (req, res) => {
-    const { name, title, author } = req.body;
+    const { name, title, author, content } = req.body;
     const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    
     if (!name || !title) return res.status(400).json({ error: "Headline and Category are required" });
-    const sql = "INSERT INTO blogs (name, title, image, author, date) VALUES (?, ?, ?, ?, ?)";
-    db.query(sql, [name, title, imagePath, author, date], (err, result) => {
+    
+    const sql = "INSERT INTO blogs (name, title, image, author, date, content) VALUES (?, ?, ?, ?, ?, ?)";
+    db.query(sql, [name, title, imagePath, author, date, content || ''], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
         res.status(201).json({ message: "Blog posted successfully!" });
     });
 });
+
+
 
 // --- ORDER ROUTES ---
 
@@ -294,6 +312,43 @@ app.put('/api/user/update', (req, res) => {
         if (err) return res.status(500).json(err);
         res.json({ message: "Profile updated successfully!" });
     });
+});
+
+// --- UPDATE USER PASSWORD ---
+app.put('/api/user/password', async (req, res) => {
+    const { id, newPassword } = req.body;
+    
+    // Validate input
+    if (!id || !newPassword) {
+        return res.status(400).json({ error: "User ID and new password are required" });
+    }
+    
+    if (newPassword.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    try {
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        // Update the password in the database
+        const sql = "UPDATE users SET password = ? WHERE id = ?";
+        db.query(sql, [hashedPassword, id], (err, result) => {
+            if (err) {
+                console.error("Password Update Error:", err);
+                return res.status(500).json({ error: "Database error: " + err.message });
+            }
+            
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "User not found" });
+            }
+            
+            res.json({ message: "Password updated successfully!" });
+        });
+    } catch (error) {
+        console.error("Password Hashing Error:", error);
+        res.status(500).json({ error: "Server error during password update" });
+    }
 });
 
 app.post('/api/subscribe', (req, res) => {

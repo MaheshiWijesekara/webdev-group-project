@@ -4,7 +4,6 @@ import axios from "axios";
 import { AuthContext } from "../../AuthContext"; 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
-import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
 
 // Import Swiper styles
 import "swiper/css";
@@ -14,6 +13,7 @@ import "swiper/css/pagination";
 // Toastify
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
 
 function Shop() {
   const navigate = useNavigate();
@@ -24,7 +24,6 @@ function Shop() {
   const [availability, setAvailability] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [isSecondImage, setIsSecondImage] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -42,17 +41,7 @@ function Shop() {
       .catch((err) => console.log("Fetch Error:", err));
   }, [currentPage, searchTerm, category, availability, sortBy]);
 
-  const getBySubcategory = (list, name) => list.filter((p) => p.subcategory === name);
-
   let filteredProducts = Array.isArray(products) ? [...products] : [];
-
-  const skinSections = [
-    { title: "Cleansers", key: "Cleanser" },
-    { title: "Toners", key: "Toner" },
-    { title: "Serums", key: "Serum" },
-    { title: "Moisturizers", key: "Moisturizer" },
-    { title: "Face Masks", key: "Face Mask" },
-  ];
 
   // --- ADD TO WISHLIST LOGIC ---
   const addToWishlist = (product) => {
@@ -100,84 +89,333 @@ function Shop() {
   };
 
   return (
-
-    
     <div style={{ backgroundColor: 'var(--soft-beige)', minHeight: '100vh' }}>
+      
+      {/* Breadcrumbs */}
       <Breadcrumbs />
-      <div className="container pt-5 mt-5">
-        <h1 className="shop-all pt-4" style={{ fontFamily: 'Playfair Display', color: 'var(--primary-green)' }}>Shop All Products</h1>
-        
-        {/* Search Bar - Aesthetic Upgrade */}
-        <div className="d-flex justify-content-center mb-5">
-            <div className="position-relative w-100" style={{ maxWidth: '500px' }}>
+
+      {/* Shop Header - Clean & Simple */}
+      <section className="shop-header py-4" style={{
+        backgroundColor: 'var(--soft-beige)',
+        paddingTop: '30px',
+        paddingBottom: '20px'
+      }}>
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-8 text-center">
+              <span className="d-inline-block mb-2" style={{
+                color: '#B4975A',
+                fontSize: '0.7rem',
+                letterSpacing: '4px',
+                textTransform: 'uppercase',
+                fontWeight: '600'
+              }}>
+                Our Collection
+              </span>
+              <h1 className="display-3 fw-bold mb-2" style={{
+                fontFamily: 'Playfair Display, serif',
+                color: '#2D402E',
+                letterSpacing: '1px'
+              }}>
+                Shop All <span style={{ color: '#B4975A' }}>Products</span>
+              </h1>
+              <p className="lead" style={{
+                color: '#666',
+                maxWidth: '500px',
+                margin: '0 auto',
+                fontSize: '1rem',
+                lineHeight: '1.8'
+              }}>
+                Discover our curated collection of natural skincare essentials
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Search & Filters - FIXED */}
+      <div className="container">
+        <div className="shop-toolbar py-3" style={{
+          borderTop: '1px solid rgba(45,64,46,0.08)',
+          borderBottom: '1px solid rgba(45,64,46,0.08)'
+        }}>
+          
+          {/* Search Bar - FIXED */}
+          <div className="row justify-content-center mb-3">
+            <div className="col-lg-5 col-md-7">
+              <div className="position-relative w-100">
                 <input 
-                    type="text" 
-                    className="form-control py-3 px-4 rounded-0 border-0 shadow-sm"
-                    placeholder="Search our botanical collection..."
-                    style={{ backgroundColor: '#fff', fontSize: '0.9rem' }}
-                    value={searchTerm}
-                    onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                  type="text" 
+                  className="form-control"
+                  placeholder="Search our botanical collection..."
+                  style={{
+                    border: '1px solid #eee',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    padding: '10px 45px 10px 45px',
+                    transition: 'all 0.3s ease',
+                    backgroundColor: 'white',
+                    width: '100%',
+                    outline: 'none'
+                  }}
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#B4975A';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(180,151,90,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#eee';
+                    e.target.style.boxShadow = 'none';
+                  }}
                 />
-                <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
+                <i 
+                  className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3" 
+                  style={{ 
+                    fontSize: '1rem', 
+                    color: '#999',
+                    pointerEvents: 'none'
+                  }}
+                ></i>
+                {searchTerm && (
+                  <button
+                    className="position-absolute top-50 end-0 translate-middle-y me-2 border-0 bg-transparent"
+                    onClick={() => setSearchTerm("")}
+                    style={{
+                      color: '#999',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      padding: '5px'
+                    }}
+                  >
+                    <i className="bi bi-x-circle"></i>
+                  </button>
+                )}
+              </div>
             </div>
-        </div>
+          </div>
 
-        {/* Toolbar - Aesthetic Upgrade */}
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 gap-3 border-bottom pb-4">
-            <div className="d-flex gap-3">
-                <select className="form-select border-0 bg-white rounded-0 shadow-sm small" value={category} onChange={(e) => { setCategory(e.target.value); setCurrentPage(1); }}>
-                    <option value="all">ALL CATEGORIES</option>
-                    <option value="Skin">SKIN CARE</option>
-                    <option value="Lip">LIP CARE</option>
-                    <option value="Body">BODY CARE</option>
-                </select>
-                <select className="form-select border-0 bg-white rounded-0 shadow-sm small" value={availability} onChange={(e) => { setAvailability(e.target.value); setCurrentPage(1); }}>
-                    <option value="all">AVAILABILITY</option>
-                    <option value="In">IN STOCK</option>
-                    <option value="Out">OUT OF STOCK</option>
-                </select>
+          {/* Filters - In a Row */}
+          <div className="d-flex flex-wrap justify-content-center align-items-center gap-2">
+            {/* Category Filter */}
+            <div className="filter-group" style={{ minWidth: '160px' }}>
+              <select 
+                className="form-select"
+                style={{
+                  padding: '8px 30px 8px 15px',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  fontWeight: '500',
+                  color: '#666',
+                  border: '1px solid #eee',
+                  backgroundColor: 'white',
+                  width: '100%',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+                value={category} 
+                onChange={(e) => { setCategory(e.target.value); setCurrentPage(1); }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#B4975A';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(180,151,90,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#eee';
+                  e.target.style.boxShadow = 'none';
+                }}
+              >
+                <option value="all">ALL CATEGORIES</option>
+                <option value="Skin">SKIN CARE</option>
+                <option value="Lip">LIP CARE</option>
+                <option value="Body">BODY CARE</option>
+              </select>
             </div>
-            <div className="d-flex align-items-center gap-2">
-                <span className="small text-muted fw-bold">SORT BY:</span>
-                <select className="form-select border-0 bg-transparent fw-bold small" style={{ width: 'auto' }} value={sortBy} onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}>
-                    <option value="default">DEFAULT</option>
-                    <option value="New">NEWEST</option>
-                    <option value="Sale">ON SALE</option>
-                </select>
-            </div>
-        </div>
 
-        {/* --- PRODUCT GRID --- */}
+            {/* Availability Filter */}
+            <div className="filter-group" style={{ minWidth: '150px' }}>
+              <select 
+                className="form-select"
+                style={{
+                  padding: '8px 30px 8px 15px',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  fontWeight: '500',
+                  color: '#666',
+                  border: '1px solid #eee',
+                  backgroundColor: 'white',
+                  width: '100%',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+                value={availability} 
+                onChange={(e) => { setAvailability(e.target.value); setCurrentPage(1); }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#B4975A';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(180,151,90,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#eee';
+                  e.target.style.boxShadow = 'none';
+                }}
+              >
+                <option value="all">AVAILABILITY</option>
+                <option value="In">IN STOCK</option>
+                <option value="Out">OUT OF STOCK</option>
+              </select>
+            </div>
+
+            {/* Sort Filter */}
+            <div className="filter-group" style={{ minWidth: '160px' }}>
+              <select 
+                className="form-select"
+                style={{
+                  padding: '8px 30px 8px 15px',
+                  borderRadius: '8px',
+                  fontSize: '0.78rem',
+                  fontWeight: '500',
+                  color: '#666',
+                  border: '1px solid #eee',
+                  backgroundColor: 'white',
+                  width: '100%',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+                value={sortBy} 
+                onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#B4975A';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(180,151,90,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#eee';
+                  e.target.style.boxShadow = 'none';
+                }}
+              >
+                <option value="default">SORT BY: DEFAULT</option>
+                <option value="New">NEWEST</option>
+                <option value="Sale">ON SALE</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- PRODUCT GRID --- */}
+      <div className="container py-4">
         <div className="row g-4">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((p) => (
                 <div key={p.id} className="col-xl-3 col-lg-4 col-6">
-                    <div className="product-card border-0 bg-white shadow-sm h-100 p-0 overflow-hidden" style={{ transition: '0.3s' }}>
-                        <div className="product-image position-relative overflow-hidden" style={{ height: '320px' }}>
+                    <div className="product-card" style={{
+                      backgroundColor: 'white',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.06)',
+                      transition: 'all 0.4s ease',
+                      border: '1px solid rgba(45,64,46,0.06)',
+                      height: '100%'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-5px)';
+                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.06)';
+                    }}>
+                        <div className="product-image position-relative overflow-hidden" style={{ height: '280px' }}>
                             <img 
                                 src={p.image} 
                                 alt={p.pname} 
-                                className="w-100 h-100 object-fit-cover transition-hover"
-                                onMouseOver={(e) => (e.target.src = p.secondImage || p.image)} 
-                                onMouseOut={(e) => (e.target.src = p.image)} 
-                                style={{ transition: '0.6s ease' }}
+                                className="w-100 h-100"
+                                style={{
+                                  objectFit: 'cover',
+                                  transition: 'transform 0.6s ease'
+                                }}
+                                onMouseOver={(e) => {
+                                  if (p.secondImage) {
+                                    e.target.src = p.secondImage;
+                                  }
+                                }} 
+                                onMouseOut={(e) => {
+                                  e.target.src = p.image;
+                                }} 
                             />
-                            {/* Quick View Eye */}
-                            <div className="quick-view-overlay d-flex align-items-center justify-content-center">
-                                <button className="btn btn-white rounded-pill shadow-sm p-3" onClick={() => { setSelectedProduct(p); setQuantity(1); }}>
-                                    <i className="bi bi-eye fs-4" style={{ color: 'var(--primary-green)' }}></i>
+                            {/* Quick View Button */}
+                            <div className="quick-view-overlay d-flex align-items-center justify-content-center" style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              backgroundColor: 'rgba(45,64,46,0.3)',
+                              opacity: 0,
+                              transition: 'opacity 0.3s ease',
+                              zIndex: 2
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}>
+                                <button 
+                                  className="btn btn-white rounded-circle shadow-sm" 
+                                  onClick={() => { setSelectedProduct(p); setQuantity(1); }}
+                                  style={{
+                                    width: '50px',
+                                    height: '50px',
+                                    backgroundColor: 'white',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transform: 'translateY(20px)',
+                                    transition: 'transform 0.4s ease'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                  }}
+                                >
+                                    <i className="bi bi-eye" style={{ color: '#2D402E', fontSize: '1.2rem' }}></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div className="p-4 text-center d-flex flex-column h-100">
-                            <h6 className="fw-bold mb-1" style={{ color: 'var(--primary-green)', fontFamily: 'Montserrat', fontSize: '0.9rem' }}>{p.pname}</h6>
-                            <p className="text-muted small mb-3">Rs. {p.price}</p>
+                        <div className="p-3 text-center d-flex flex-column">
+                            <h6 className="fw-bold mb-1" style={{
+                              color: '#2D402E',
+                              fontSize: '0.85rem',
+                              fontFamily: 'Playfair Display, serif',
+                              minHeight: '2.5rem'
+                            }}>
+                                {p.pname}
+                            </h6>
+                            <p className="text-muted small mb-2" style={{ fontSize: '0.9rem' }}>
+                                Rs. {p.price}
+                            </p>
                             
-                            {/* UGLY BUTTON REPLACED WITH ELEGANT LINK */}
                             <button 
                                 className="journal-link mt-auto mx-auto text-decoration-none border-0 bg-transparent" 
                                 onClick={() => navigate(`/product/${p.id}`)}
+                                style={{
+                                  color: '#2D402E',
+                                  fontSize: '0.7rem',
+                                  fontWeight: '600',
+                                  letterSpacing: '1px',
+                                  borderBottom: '2px solid #B4975A',
+                                  paddingBottom: '3px',
+                                  transition: 'all 0.3s ease',
+                                  cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.color = '#B4975A';
+                                  e.target.style.borderBottomColor = '#2D402E';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.color = '#2D402E';
+                                  e.target.style.borderBottomColor = '#B4975A';
+                                }}
                             >
                                 DISCOVER MORE —
                             </button>
@@ -187,8 +425,27 @@ function Shop() {
             ))
           ) : (
             <div className="text-center py-5 w-100">
-                <h4 className="text-muted fst-italic">No products found in this ritual...</h4>
-                <button className="btn btn-link text-dark" onClick={() => {setSearchTerm(""); setCategory("all")}}>Clear Filters</button>
+                <i className="bi bi-box-seam" style={{ fontSize: '3rem', color: '#B4975A', opacity: 0.5 }}></i>
+                <h4 className="mt-3 text-muted" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  No products found in this ritual...
+                </h4>
+                <button 
+                  className="btn mt-3" 
+                  onClick={() => {setSearchTerm(""); setCategory("all")}}
+                  style={{
+                    backgroundColor: '#B4975A',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 25px',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#2D402E'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#B4975A'}
+                >
+                  Clear Filters
+                </button>
             </div>
           )}
         </div>
@@ -196,15 +453,82 @@ function Shop() {
         {/* --- PAGINATION --- */}
         {totalPages > 1 && (
             <div className="d-flex justify-content-center gap-2 my-5">
-                <button className="btn btn-outline-dark rounded-0 px-4" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+                <button 
+                  className="btn px-4 py-2" 
+                  disabled={currentPage === 1} 
+                  onClick={() => setCurrentPage(prev => prev - 1)}
+                  style={{
+                    backgroundColor: 'white',
+                    color: '#666',
+                    border: '1px solid #eee',
+                    borderRadius: '8px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = '#2D402E';
+                      e.target.style.color = 'white';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = 'white';
+                      e.target.style.color = '#666';
+                    }
+                  }}
+                >
                     <i className="bi bi-chevron-left"></i>
                 </button>
                 {[...Array(totalPages)].map((_, index) => (
-                    <button key={index + 1} className={`btn rounded-0 px-4 ${currentPage === index + 1 ? 'btn-dark' : 'btn-outline-dark'}`} style={{ backgroundColor: currentPage === index + 1 ? 'var(--primary-green)' : 'transparent' }} onClick={() => setCurrentPage(index + 1)}>
+                    <button 
+                      key={index + 1} 
+                      className={`btn px-4 py-2`}
+                      onClick={() => setCurrentPage(index + 1)}
+                      style={{
+                        backgroundColor: currentPage === index + 1 ? '#2D402E' : 'white',
+                        color: currentPage === index + 1 ? 'white' : '#666',
+                        border: currentPage === index + 1 ? 'none' : '1px solid #eee',
+                        borderRadius: '8px',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (currentPage !== index + 1) {
+                          e.target.style.backgroundColor = '#f5f5f5';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (currentPage !== index + 1) {
+                          e.target.style.backgroundColor = 'white';
+                        }
+                      }}
+                    >
                         {index + 1}
                     </button>
                 ))}
-                <button className="btn btn-outline-dark rounded-0 px-4" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+                <button 
+                  className="btn px-4 py-2" 
+                  disabled={currentPage === totalPages} 
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                  style={{
+                    backgroundColor: 'white',
+                    color: '#666',
+                    border: '1px solid #eee',
+                    borderRadius: '8px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = '#2D402E';
+                      e.target.style.color = 'white';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.backgroundColor = 'white';
+                      e.target.style.color = '#666';
+                    }
+                  }}
+                >
                     <i className="bi bi-chevron-right"></i>
                 </button>
             </div>
@@ -212,81 +536,78 @@ function Shop() {
       </div>
 
       {/* --- QUICK VIEW MODAL --- */}
-      {/* --- QUICK VIEW MODAL --- */}
-{selectedProduct && (
-  <div className="popup-overlay" onClick={(e) => {
-    if (e.target === e.currentTarget) setSelectedProduct(null);
-  }}>
-    <div className="popup-box">
-      {/* Close Button */}
-      <button className="close-btn" onClick={() => setSelectedProduct(null)}>
-        ✕
-      </button>
-
-      <div className="row g-0">
-        {/* LEFT: IMAGE CAROUSEL */}
-        <div className="col-md-6">
-          <div className="popup-image-wrapper">
-            <Swiper
-              modules={[Navigation, Pagination]}
-              navigation
-              pagination={{ clickable: true }}
-              className="quickview-swiper"
-            >
-              <SwiperSlide>
-                <img src={selectedProduct.image} alt="Main" />
-              </SwiperSlide>
-              {selectedProduct.secondImage && (
-                <SwiperSlide>
-                  <img src={selectedProduct.secondImage} alt="Secondary" />
-                </SwiperSlide>
-              )}
-            </Swiper>
-          </div>
-        </div>
-
-        {/* RIGHT: PRODUCT INFO */}
-        <div className="col-md-6">
-          <div className="popup-details">
-            <span className="popup-category">
-              {selectedProduct.category || 'SKIN RITUAL'}
-            </span>
-            
-            <h2 className="popup-title">{selectedProduct.pname}</h2>
-            
-            <p className="popup-price">Rs. {selectedProduct.price}</p>
-            
-            <p className="popup-description">
-              {selectedProduct.pdescription || 'A luxurious skincare product designed to nourish and revitalize your skin.'}
-            </p>
-
-            <div className="popup-actions">
-              <div className="popup-quantity">
-                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
-                <span>{quantity}</span>
-                <button onClick={() => setQuantity(q => q + 1)}>+</button>
-              </div>
-              
-              <button 
-                className="popup-add-to-cart" 
-                onClick={() => addToCart(selectedProduct)}
-              >
-                ADD TO CART
-              </button>
-            </div>
-
-            <button 
-              className="popup-view-details" 
-              onClick={() => navigate(`/product/${selectedProduct.id}`)}
-            >
-              View Full Details →
+      {selectedProduct && (
+        <div className="popup-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) setSelectedProduct(null);
+        }}>
+          <div className="popup-box shadow-lg">
+            <button className="close-btn" onClick={() => setSelectedProduct(null)}>
+              <i className="bi bi-x-lg"></i>
             </button>
+
+            <div className="row g-0">
+              <div className="col-md-6">
+                <div className="popup-image-wrapper">
+                  <Swiper
+                    modules={[Navigation, Pagination]}
+                    navigation
+                    pagination={{ clickable: true }}
+                    className="quickview-swiper"
+                  >
+                    <SwiperSlide>
+                      <img src={selectedProduct.image} alt="Main" className="w-100 h-100 object-fit-cover" />
+                    </SwiperSlide>
+                    {selectedProduct.secondImage && (
+                      <SwiperSlide>
+                        <img src={selectedProduct.secondImage} alt="Secondary" className="w-100 h-100 object-fit-cover" />
+                      </SwiperSlide>
+                    )}
+                  </Swiper>
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="popup-details d-flex flex-column justify-content-center">
+                  <span className="popup-category">
+                    {selectedProduct.category || 'SKIN RITUAL'}
+                  </span>
+                  
+                  <h2 className="popup-title">{selectedProduct.pname}</h2>
+                  
+                  <p className="popup-price">Rs. {selectedProduct.price}</p>
+                  
+                  <p className="popup-description">
+                    {selectedProduct.pdescription || 'A luxurious skincare product designed to nourish and revitalize your skin.'}
+                  </p>
+
+                  <div className="popup-actions">
+                    <div className="popup-quantity">
+                      <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
+                      <span>{quantity}</span>
+                      <button onClick={() => setQuantity(q => q + 1)}>+</button>
+                    </div>
+                    
+                    <button 
+                      className="popup-add-to-cart" 
+                      onClick={() => addToCart(selectedProduct)}
+                    >
+                      ADD TO CART
+                    </button>
+                  </div>
+
+                  <button 
+                    className="popup-view-details" 
+                    onClick={() => navigate(`/product/${selectedProduct.id}`)}
+                  >
+                    View Full Details →
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
+
       <ToastContainer position="bottom-right" autoClose={3000} theme="dark" />
     </div>
   );
