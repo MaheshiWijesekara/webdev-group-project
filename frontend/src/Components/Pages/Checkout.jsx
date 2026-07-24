@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../AuthContext";
 import Navbar from "../Nav/Nav";
+import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
 
 function Checkout() {
   const { user } = useContext(AuthContext);
@@ -104,17 +105,14 @@ function Checkout() {
   return (
     <>
       <Navbar />
+      <Breadcrumbs />
       <div className="container my-5 pt-5">
         <div className="row g-4 mt-2">
           {/* LEFT COLUMN: FORMS */}
           <div className="col-lg-7">
-            <nav className="mb-4 small">
-                <Link to="/Cart" className="text-decoration-none text-muted">Cart</Link>
-                <span className="mx-2 text-muted">/</span>
-                <span className="fw-bold">Information</span>
-            </nav>
+            
 
-            <section className="mb-5">
+            <section className="mb-5 mt-0">
               <h5 className="fw-bold mb-3">Contact Information</h5>
               <input
                 type="email"

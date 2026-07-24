@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../../AuthContext';
 import Navbar from '../Nav/Nav';
 import { toast, ToastContainer } from 'react-toastify';
+import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
 
 function Profile() {
     const { user, login } = useContext(AuthContext);
@@ -61,6 +62,7 @@ function Profile() {
     if (!user) return (
         <>
             <Navbar />
+            <Breadcrumbs />
             <div className="text-center py-5 mt-5">
                 <h3>Please login to view your profile.</h3>
             </div>

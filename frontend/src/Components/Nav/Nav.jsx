@@ -144,6 +144,7 @@ const Nav = () => {
                             <li><Link to="/" className="nav-link">Home</Link></li>
                             <li><Link to="/About" className="nav-link">About</Link></li>
                             <li><Link to="/Shop" className="nav-link">Shop All</Link></li>
+                            <li><Link to="/Stores" className="nav-link">Stores</Link></li>
                             <li><Link to="/Blog" className="nav-link">Blog</Link></li>
                             <li><Link to="/Contact" className="nav-link">Contact</Link></li>
                         </ul>

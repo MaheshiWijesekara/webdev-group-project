@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import axios from 'axios'; 
 import { AuthContext } from "../../AuthContext"; 
 import Navbar from "../Nav/Nav";
+import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -62,8 +63,9 @@ function Cart() {
   return (
     <>
       <Navbar />
+      <Breadcrumbs />
       <div className="container py-5 mt-5">
-        <h2 className="text-center fw-bold mb-5 pt-3">Your Shopping Cart</h2>
+        
         {cartItems.length === 0 ? (
           <div className="text-center py-5"><p>Empty cart!</p><Link to="/Shop" className="btn btn-dark">Shop Now</Link></div>
         ) : (
