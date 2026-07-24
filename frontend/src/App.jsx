@@ -15,13 +15,10 @@ import Contact from "./Components/Pages/Contact";
 import Profile from "./Components/Pages/Profile";
 import Admin from "./Components/Pages/Admin";
 
-
 function App() {
   return (
-    
     <>
       <Nav />
-      
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/product/:id" element={<ProductDetails />} />
@@ -29,19 +26,15 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/about" element={<About />} />
-        <Route path="/shop" element={<div className="app-content"><Shop /></div>} />
+        <Route path="/shop" element={<Shop />} /> {/* Removed app-content wrapper */}
         <Route path="/stores" element={<Stores />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin-virelle-hidden" element={<Admin />} />
       </Routes>
-      
       <Footer />
     </>
-
-    
   );
 }
 

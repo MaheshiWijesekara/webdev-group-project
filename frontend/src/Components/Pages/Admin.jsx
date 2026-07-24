@@ -13,6 +13,14 @@ function Admin() {
     const [orders, setOrders] = useState([]);
     const [products, setProducts] = useState([]);
 
+    const [showProductForm, setShowProductForm] = useState(false);
+    const [newProduct, setNewProduct] = useState({
+    pname: '', pdescription: '', price: '', tag: 'New', 
+    category: 'Skin', subcategory: 'Cleanser', rating: 5
+});
+    const [mainFile, setMainFile] = useState(null);
+    const [secondFile, setSecondFile] = useState(null);
+
     // --- SECURITY CHECK ---
     useEffect(() => {
         // If user is not logged in OR is not an admin, kick them to home
@@ -69,6 +77,25 @@ function Admin() {
         }
     };
 
+    const handleAddProduct = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    // Append text fields
+    Object.keys(newProduct).forEach(key => formData.append(key, newProduct[key]));
+    // Append files
+    formData.append('image', mainFile);
+    formData.append('secondImage', secondFile);
+
+    try {
+        await axios.post('http://localhost:5000/api/products', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        toast.success("Product Added!");
+        setShowProductForm(false);
+        fetchData(); // Refresh grid
+    } catch (err) { toast.error("Failed to add product"); }
+};
+
     if (!user || user.role !== 'admin') return null; // Prevent flicker before redirect
 
     return (
@@ -78,6 +105,9 @@ function Admin() {
                 <div className="d-flex justify-content-between align-items-center mb-5">
                     <h1 className="fw-bold m-0" style={{fontFamily: 'Playfair Display', color: 'var(--primary-green)'}}>Management Dashboard</h1>
                     <span className="badge bg-danger px-3 py-2">ADMIN ACCESS</span>
+                    <button className="btn btn-dark px-4 py-2" onClick={() => setShowProductForm(true)}>
+    + Add New Product
+</button>
                 </div>
 
                 {/* STATS CARDS */}
@@ -140,28 +170,131 @@ function Admin() {
                     </div>
                 </div>
 
-                {/* PRODUCT INVENTORY */}
-                <div className="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                    <h4 className="fw-bold mb-4" style={{color: 'var(--primary-green)'}}>Inventory Control</h4>
-                    <div className="list-group list-group-flush">
-                        {products.map(p => (
-                            <div key={p.id} className="list-group-item d-flex justify-content-between align-items-center py-3 border-bottom-0">
-                                <div className="d-flex align-items-center">
-                                    <img src={p.image} width="60" height="60" className="rounded-3 me-3 border" style={{objectFit: 'cover'}} alt=""/>
-                                    <div>
-                                        <h6 className="fw-bold mb-0">{p.pname}</h6>
-                                        <small className="text-muted">ID: {p.id} | Rs. {p.price}</small>
-                                    </div>
-                                </div>
-                                <button className="btn btn-outline-danger btn-sm rounded-pill px-3" onClick={() => handleDeleteProduct(p.id)}>
-                                    <i className="bi bi-trash me-1"></i> Delete
-                                </button>
-                            </div>
-                        ))}
+                
+                
+{/* PRODUCT INVENTORY SECTION */}
+<div className="card border-0 shadow-sm rounded-4 p-4">
+    <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 className="fw-bold m-0" style={{color: 'var(--primary-green)'}}>Inventory Control</h4>
+            <p className="text-muted small m-0">Total Stock: {products.length} Products</p>
+        </div>
+        
+        {/* Admin Search (Optional but very helpful for 42 items) */}
+        <div className="position-relative" style={{maxWidth: '300px'}}>
+            <input 
+                type="text" 
+                className="form-control form-control-sm ps-4 rounded-pill" 
+                placeholder="Find a product..." 
+                onChange={(e) => {
+                    const term = e.target.value.toLowerCase();
+                    // Basic local search logic
+                    setProducts(products.filter(p => p.pname.toLowerCase().includes(term)));
+                }}
+            />
+            <i className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-muted small"></i>
+        </div>
+    </div>
+
+    {/* THE GRID: 4 Items per row (col-lg-3) */}
+    <div className="row g-3">
+        {products.map(p => (
+            <div key={p.id} className="col-xl-3 col-lg-4 col-sm-6">
+                <div className="card h-100 border-0 bg-light p-2 transition-hover text-center" style={{borderRadius: '15px'}}>
+                    {/* Compact Image */}
+                    <div className="rounded-3 overflow-hidden mb-2" style={{height: '120px'}}>
+                        <img 
+                            src={p.image} 
+                            className="w-100 h-100 object-fit-cover" 
+                            alt="" 
+                            loading="lazy"
+                        />
+                    </div>
+
+                    {/* Compact Info */}
+                    <p className="fw-bold small mb-1 text-truncate px-2" title={p.pname}>
+                        {p.pname}
+                    </p>
+                    <p className="text-muted extra-small mb-2" style={{fontSize: '0.75rem'}}>
+                        ID: {p.id} | <span className="text-success fw-bold">Rs.{p.price}</span>
+                    </p>
+
+                    {/* Small Delete Button */}
+                    <div className="px-2 pb-1 mt-auto">
+                        <button 
+                            className="btn btn-danger btn-sm w-100 rounded-pill py-1" 
+                            style={{fontSize: '0.75rem'}}
+                            onClick={() => handleDeleteProduct(p.id)}
+                        >
+                            <i className="bi bi-trash3 me-1"></i> REMOVE
+                        </button>
                     </div>
                 </div>
             </div>
+        ))}
+    </div>
+</div>
+            </div>
             <ToastContainer position="bottom-right" />
+            {showProductForm && (
+    <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1060}}>
+        <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content p-4 border-0 rounded-4 shadow-lg" style={{maxHeight: '90vh', overflowY: 'auto'}}>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h3 className="fw-bold m-0">Add Botanical Product</h3>
+                    <button className="btn-close" onClick={() => setShowProductForm(false)}></button>
+                </div>
+                
+                <form onSubmit={handleAddProduct} className="row g-3">
+                    <div className="col-md-6">
+                        <label className="form-label small fw-bold">Product Name</label>
+                        <input type="text" className="form-control" onChange={(e)=>setNewProduct({...newProduct, pname: e.target.value})} required />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label small fw-bold">Price (Numeric)</label>
+                        <input type="number" className="form-control" onChange={(e)=>setNewProduct({...newProduct, price: e.target.value})} required />
+                    </div>
+                    <div className="col-12">
+                        <label className="form-label small fw-bold">Description</label>
+                        <textarea className="form-control" rows="3" onChange={(e)=>setNewProduct({...newProduct, pdescription: e.target.value})} required></textarea>
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label small fw-bold">Category</label>
+                        <select className="form-select" onChange={(e)=>setNewProduct({...newProduct, category: e.target.value})}>
+                            <option value="Skin">Skin Care</option>
+                            <option value="Lip">Lip Care</option>
+                            <option value="Body">Body Care</option>
+                        </select>
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label small fw-bold">Subcategory</label>
+                        <input type="text" className="form-control" placeholder="e.g. Cleanser" onChange={(e)=>setNewProduct({...newProduct, subcategory: e.target.value})} />
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label small fw-bold">Tag</label>
+                        <select className="form-select" onChange={(e)=>setNewProduct({...newProduct, tag: e.target.value})}>
+                            <option value="New">New</option>
+                            <option value="Sale">Sale</option>
+                            <option value="Best">Best Seller</option>
+                        </select>
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label small fw-bold">Main Image</label>
+                        <input type="file" className="form-control" onChange={(e)=>setMainFile(e.target.files[0])} required />
+                    </div>
+                    <div className="col-md-6">
+                        <label className="form-label small fw-bold">Hover Image</label>
+                        <input type="file" className="form-control" onChange={(e)=>setSecondFile(e.target.files[0])} required />
+                    </div>
+                    
+                    <div className="col-12 mt-4">
+                        <button type="submit" className="btn btn-dark w-100 py-3 fw-bold">PUBLISH TO STORE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+)}
         </>
     );
 }

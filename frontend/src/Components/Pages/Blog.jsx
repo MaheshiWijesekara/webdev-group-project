@@ -4,11 +4,12 @@ import axios from 'axios';
 import { AuthContext } from '../../AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import Navbar from '../Nav/Nav';
+import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
 
 function Blog() {
-    const { user } = useContext(AuthContext); // To get the logged-in user's name
+    const { user } = useContext(AuthContext); 
     const [blogs, setBlogs] = useState([]);
-    const [showForm, setShowForm] = useState(false); // Toggle form modal
+    const [showForm, setShowForm] = useState(false); 
     
     // New Blog State for Text Fields
     const [newBlog, setNewBlog] = useState({
@@ -34,87 +35,95 @@ function Blog() {
         fetchBlogs();
     }, []);
 
-    // 2. Handle Submit using FormData (Required for File Uploads)
+    // 2. Handle Submit using FormData
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!user) {
-            return toast.error("Please login to post a blog");
-        }
+        if (!user) return toast.error("Please login to post a blog");
+        if (!file) return toast.error("Please select an image to upload");
 
-        if (!file) {
-            return toast.error("Please select an image to upload");
-        }
-
-        // We use FormData because we are sending a physical file, not just text
         const formData = new FormData();
         formData.append('name', newBlog.name);
         formData.append('title', newBlog.title);
         formData.append('author', `By ${user.name}`);
-        formData.append('image', file); // 'image' must match upload.single('image') in server.js
+        formData.append('image', file); 
 
         try {
             await axios.post('http://localhost:5000/api/blogs', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data' // Tells the server to expect a file
-                }
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            toast.success("Blog posted successfully!");
-            setNewBlog({ name: '', title: '' }); // Reset text fields
-            setFile(null); // Clear the file state
-            setShowForm(false); // Close modal
-            fetchBlogs(); // Refresh the list from the database
+            toast.success("Article published successfully!");
+            setNewBlog({ name: '', title: '' }); 
+            setFile(null); 
+            setShowForm(false); 
+            fetchBlogs(); 
         } catch (err) {
             console.error("Upload Error:", err);
-            toast.error("Error posting blog. Make sure your server is running.");
+            toast.error("Error posting blog.");
         }
     };
 
     return (
-        <>
+        <div style={{ backgroundColor: 'var(--soft-beige)', minHeight: '100vh' }}>
             <Navbar />
-            
-            {/* Breadcrumbs */}
-            
 
-            <div className="container py-5 mt-5 pt-5">
-                {/* Header Section */}
-                <div className="d-flex justify-content-between align-items-center mb-5">
-                    <h1 className="fw-semibold text-center">LATEST NEWS</h1>
-                    {/* Only show "Write a Blog" if user is logged in */}
+            
+            <Breadcrumbs />
+
+                  
+            {/* Header Section */}
+            <div className="container py-5">
+                <div className="text-center mb-5 mt-4">
+                    <h1 className="display-4 fw-bold mt-2" style={{ fontFamily: 'Playfair Display', color: 'var(--primary-green)' }}>The Virelle Journal</h1>
+                    <div className="mx-auto mt-3" style={{ width: '60px', height: '2px', backgroundColor: 'var(--primary-green)' }}></div>
+                </div>
+
+                <div className="d-flex justify-content-between align-items-center mb-5 border-bottom pb-4">
+                    <p className="m-0 text-muted fst-italic">Expert beauty tips and natural skincare secrets.</p>
                     {user && (
-                        <button className="btn btn-dark px-4 py-2" onClick={() => setShowForm(true)}>
-                            + Write a Blog
+                        <button className="btn btn-dark px-4 py-2" onClick={() => setShowForm(true)} style={{ borderRadius: '0', fontSize: '0.85rem' }}>
+                            + WRITE AN ARTICLE
                         </button>
                     )}
                 </div>
 
-                <div className="row g-4">
+                {/* Blog Grid */}
+                <div className="row g-5">
                     {blogs.map(blog => (
                         <div className='col-lg-4 col-md-6' key={blog.id}>
-                            <div className="blog-items text-center position-relative shadow-sm rounded bg-white h-100 pb-3 transition-hover">
-                                <div className="blog-image w-100 overflow-hidden" style={{height: '250px'}}>
+                            <div className="card h-100 border-0 bg-white shadow-sm overflow-hidden" style={{ transition: 'all 0.3s ease' }}>
+                                <div className="position-relative" style={{ height: '260px', overflow: 'hidden' }}>
                                     <img 
-                                        /* 
-                                           LOGIC: If the image path starts with /uploads, it's a server file.
-                                           If it starts with /Images, it's a public folder file.
-                                        */
                                         src={blog.image && blog.image.startsWith('/uploads') 
                                             ? `http://localhost:5000${blog.image}` 
                                             : blog.image} 
                                         alt={blog.name} 
-                                        className="img-fluid w-100 h-100 object-fit-cover" 
+                                        className="w-100 h-100 object-fit-cover transition-hover"
+                                        style={{ transition: '0.6s ease' }}
                                         onError={(e) => { e.target.src = "https://via.placeholder.com/400x250?text=Virelle+Beauty"; }}
                                     />
+                                    <span className="position-absolute top-0 start-0 m-3 badge" style={{ backgroundColor: 'var(--primary-green)', padding: '8px 15px', borderRadius: '0', fontSize: '0.7rem', letterSpacing: '1px' }}>
+                                        {blog.title.toUpperCase()}
+                                    </span>
                                 </div>
-                                <div className="blog-content pt-3 px-3">
-                                    <span className="text-muted small text-uppercase fw-bold" style={{letterSpacing: '1px'}}>{blog.title}</span>
-                                    <h4 className="mt-2 fw-bold text-dark" style={{fontSize: '1.2rem'}}>{blog.name}</h4>
-                                    <div className="d-flex justify-content-center gap-3 mt-3 border-top pt-3">
-                                        <span className="small text-muted">{blog.author}</span>
-                                        <span className="small text-muted border-start ps-3">{blog.date}</span>
+                                
+                                <div className="card-body p-4 d-flex flex-column">
+                                    <h4 className="fw-bold mb-3" style={{ fontFamily: 'Playfair Display', color: 'var(--primary-green)', lineHeight: '1.4' }}>
+                                        {blog.name}
+                                    </h4>
+                                    
+                                    <div className="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                        <span className="small fw-semibold text-muted text-uppercase" style={{ fontSize: '0.7rem' }}>{blog.author}</span>
+                                        <span className="small text-muted" style={{ fontSize: '0.7rem' }}>{blog.date}</span>
                                     </div>
+                                    
+                                    <Link 
+    to={`/blog/${blog.id}`} 
+    className="journal-link mt-auto pt-3 text-decoration-none fw-bold"
+>
+    READ ARTICLE →
+</Link>
                                 </div>
                             </div>
                         </div>
@@ -122,23 +131,23 @@ function Blog() {
                 </div>
             </div>
 
-            {/* --- ADD BLOG MODAL (Manual UI implementation) --- */}
+            {/* --- ADD BLOG MODAL --- */}
             {showForm && (
-                <div className="modal show d-block" tabIndex="-1" style={{backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050}}>
+                <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(45, 64, 46, 0.8)', backdropFilter: 'blur(5px)', zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content p-4 border-0 rounded-4 shadow-lg">
-                            <div className="d-flex justify-content-between align-items-center mb-4">
-                                <h3 className="fw-bold m-0">Create New Post</h3>
+                        <div className="modal-content p-4 border-0 rounded-0 shadow-lg" style={{ backgroundColor: 'var(--soft-beige)' }}>
+                            <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                                <h3 className="fw-bold m-0" style={{ fontFamily: 'Playfair Display', color: 'var(--primary-green)' }}>New Journal Entry</h3>
                                 <button type="button" className="btn-close" onClick={() => setShowForm(false)}></button>
                             </div>
                             
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label className="form-label small fw-bold">Headline</label>
+                                    <label className="form-label small fw-bold text-muted">ARTICLE HEADLINE</label>
                                     <input 
                                         type="text" 
-                                        className="form-control" 
-                                        placeholder="e.g. Tips to Apply Luxury Cream" 
+                                        className="form-control rounded-0 border-0 bg-white" 
+                                        placeholder="e.g. The Magic of Sandalwood" 
                                         value={newBlog.name}
                                         onChange={(e) => setNewBlog({...newBlog, name: e.target.value})} 
                                         required 
@@ -146,11 +155,11 @@ function Blog() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label small fw-bold">Category</label>
+                                    <label className="form-label small fw-bold text-muted">CATEGORY</label>
                                     <input 
                                         type="text" 
-                                        className="form-control" 
-                                        placeholder="e.g. Natural Cleansers" 
+                                        className="form-control rounded-0 border-0 bg-white" 
+                                        placeholder="e.g. Herbal Rituals" 
                                         value={newBlog.title}
                                         onChange={(e) => setNewBlog({...newBlog, title: e.target.value})} 
                                         required 
@@ -158,20 +167,18 @@ function Blog() {
                                 </div>
 
                                 <div className="mb-4">
-                                    <label className="form-label small fw-bold">Upload Header Image</label>
+                                    <label className="form-label small fw-bold text-muted">HEADER IMAGE</label>
                                     <input 
                                         type="file" 
-                                        className="form-control" 
+                                        className="form-control rounded-0 border-0 bg-white" 
                                         accept="image/*" 
-                                        /* We use files[0] to capture the actual file object */
                                         onChange={(e) => setFile(e.target.files[0])} 
                                         required 
                                     />
-                                    <div className="form-text">JPG, PNG or WEBP recommended.</div>
                                 </div>
 
-                                <button type="submit" className="btn btn-dark w-100 py-2 fw-bold">
-                                    PUBLISH BLOG
+                                <button type="submit" className="btn btn-dark w-100 py-3 fw-bold rounded-0" style={{ backgroundColor: 'var(--primary-green)', letterSpacing: '2px' }}>
+                                    PUBLISH TO JOURNAL
                                 </button>
                             </form>
                         </div>
@@ -180,7 +187,7 @@ function Blog() {
             )}
 
             <ToastContainer position="bottom-right" autoClose={3000} />
-        </>
+        </div>
     );
 }
 

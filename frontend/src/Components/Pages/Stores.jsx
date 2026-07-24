@@ -5,14 +5,14 @@ import store3 from './../../assets/store_page/store3.png';
 
 import {Link} from 'react-router-dom'
 
+import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+
 
 function Stores() {
   return (
     <>
-        <ol className="section-banner py-3 position-relative">
-            <li className="position-relative"><Link to="/">Home</Link></li>
-            <li className="position-relative active"><span className='ps-5'>Stores</span></li>
-        </ol>
+        <Breadcrumbs />
+        
 
         <div className="container store-wrap my-3 py-3">
             <div className="row">

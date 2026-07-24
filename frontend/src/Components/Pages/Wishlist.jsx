@@ -3,7 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../Nav/Nav"; // 1. Added Import
 import { Link } from "react-router-dom"; // Added for navigation
-
+import Breadcrumbs from "../Breadcrumbs/Breadcrumbs"; 
 function Wishlist() {
   const [wishlist, setWishlist] = useState([]);
   const [cart, setCart] = useState([]);
@@ -54,10 +54,11 @@ function Wishlist() {
   return (
       <>
       <Navbar />
+      <Breadcrumbs />
       
 
     <div className="container my-5 mt-5 pt-5">
-        <h2 className="text-center fw-bold mb-4">Your Wishlist</h2>
+        
 
         {wishlist.length === 0 ? (
             <div className="text-center">

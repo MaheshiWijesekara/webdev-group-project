@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -8,6 +9,8 @@ import payment3 from './../../assets/payment-3.svg';
 import payment4 from './../../assets/payment-4.svg';
 import payment5 from './../../assets/payment-5.svg';
 import payment7 from './../../assets/payment-6.svg';
+
+import Contact from '../Pages/Contact';
 
 
 function Footer() {
@@ -66,17 +69,16 @@ function Footer() {
                             <h3 className="mb-3">Information</h3>
                             <ul className="list-unstyled">
                                 <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Start a Return</a>
+                                    <Link to="/Contact#returns" className="text-decoration-none">- Start a Return</Link>
                                 </li>
                                 <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Contact Us</a>
+                                    <Link to="/Contact" className="text-decoration-none">- Contact Us</Link>
+                                    
                                 </li>
                                 <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Shipping FAQ</a>
+                                    <Link to="/Contact#faq" className="text-decoration-none">- Shipping FAQ</Link>
                                 </li>
-                                <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Terms & Conditions</a>
-                                </li>
+                                
                                 <li className="mb-2">
                                     <a href="#" className="text-decoration-none">- Privacy Policy</a>
                                 </li>

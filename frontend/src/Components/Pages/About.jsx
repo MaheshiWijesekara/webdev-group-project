@@ -10,6 +10,8 @@ import client4 from './../../assets/about_page/brand-logo-4.png';
 import client5 from './../../assets/about_page/brand-logo-5.png';
 import client6 from './../../assets/about_page/brand-logo-6.png';
 
+import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+
 const About = () => {
 
     const [quote, setQuote] = useState(
@@ -18,6 +20,8 @@ const About = () => {
 
   return (
     <>
+
+    <Breadcrumbs />
 
     {/* about head */}
 
