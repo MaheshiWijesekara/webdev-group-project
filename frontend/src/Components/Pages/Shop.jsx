@@ -15,7 +15,6 @@ import "swiper/css/pagination";
 // Toastify
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
 
 function Shop() {
   const navigate = useNavigate();
@@ -44,7 +43,6 @@ function Shop() {
       .catch((err) => console.log("Fetch Error:", err));
   }, [currentPage, searchTerm, category, availability, sortBy]);
 
-
   const categorySections = {
     Skin: [
       { title: "Cleansers", key: "Cleanser" },
@@ -53,49 +51,46 @@ function Shop() {
       { title: "Moisturizers", key: "Moisturizer" },
       { title: "Face Masks", key: "Face Mask" },
     ],
-
     Hair: [
       { title: "Hair Oil", key: "Hair Oil" },
       { title: "Shampoo", key: "Shampoo" },
       { title: "Conditioner", key: "Conditioner" },
     ],
-
     Lip: [
       { title: "Lip Balm", key: "Lip Balm" },
       { title: "Lip Scrub", key: "Lip Scrub" },
     ],
-
     Body: [
       { title: "Body Lotion", key: "Body Lotion" },
       { title: "Body Scrub", key: "Body Scrub" },
     ]
   };
 
+  // --- FILTER LOGIC ---
   let filteredProducts = Array.isArray(products) ? [...products] : [];
 
   if (category !== "all") {
-    const order = categorySections[category].map(section => section.key);
-
-    filteredProducts.sort((a, b) => {
-      return order.indexOf(a.subcategory) - order.indexOf(b.subcategory);
-    });
+    const categoryKeys = categorySections[category]?.map(section => section.key) || [];
+    filteredProducts = filteredProducts.filter(p => categoryKeys.includes(p.subcategory));
   }
 
+  if (availability === "In") {
+    filteredProducts = filteredProducts.filter(p => p.stock > 0);
+  } else if (availability === "Out") {
+    filteredProducts = filteredProducts.filter(p => p.stock === 0 || p.stock < 1);
+  }
+
+  if (sortBy === "New") {
+    filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sortBy === "Sale") {
+    filteredProducts.sort((a, b) => (b.discount || 0) - (a.discount || 0));
+  }
+
+  // --- PAGINATION LOGIC ---
   const productsPerPage = 8;
-
   const startIndex = (currentPage - 1) * productsPerPage;
-
-  const paginatedProducts = filteredProducts.slice(
-    startIndex,
-    startIndex + productsPerPage
-  );
-
-  const calculatedTotalPages = Math.ceil(
-    filteredProducts.length / productsPerPage
-  );
-
-
-  let filteredProducts = Array.isArray(products) ? [...products] : [];
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + productsPerPage);
+  const calculatedTotalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   // --- ADD TO WISHLIST LOGIC ---
   const addToWishlist = (product) => {
@@ -143,125 +138,10 @@ function Shop() {
   };
 
   return (
-
-
     <div style={{ backgroundColor: 'var(--soft-beige)', minHeight: '100vh' }}>
-      
       {/* Breadcrumbs */}
       <Breadcrumbs />
-      <div className="container pt-1 mt-1">
-        <h1 className="shop-all pt-4" style={{ fontFamily: 'Playfair Display', color: 'var(--primary-green)', textAlign: 'center' }}>Shop All Products</h1>
-
-        {/* Search Bar - Aesthetic Upgrade */}
-        <div className="d-flex justify-content-center mb-5">
-          <div className="position-relative w-100" style={{ maxWidth: '500px' }}>
-            <input
-              type="text"
-              className="form-control py-3 px-4 rounded-0 border-0 shadow-sm"
-              placeholder="Search our botanical collection..."
-              style={{ backgroundColor: '#fff', fontSize: '0.9rem' }}
-              value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-            />
-            <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
-          </div>
-        </div>
-
-        {/* Toolbar - Aesthetic Upgrade */}
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 gap-3 border-bottom pb-4">
-          <div className="d-flex gap-3">
-            <select className="form-select border-0 bg-white rounded-0 shadow-sm small" value={category} onChange={(e) => { setCategory(e.target.value); setCurrentPage(1); }}>
-              <option value="all">ALL CATEGORIES</option>
-              <option value="Skin">SKIN CARE</option>
-              <option value="Lip">LIP CARE</option>
-              <option value="Body">BODY CARE</option>
-              <option value="Hair">HAIR CARE</option>
-            </select>
-            <select className="form-select border-0 bg-white rounded-0 shadow-sm small" value={availability} onChange={(e) => { setAvailability(e.target.value); setCurrentPage(1); }}>
-              <option value="all">AVAILABILITY</option>
-              <option value="In">IN STOCK</option>
-              <option value="Out">OUT OF STOCK</option>
-            </select>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <span className="small text-muted fw-bold">SORT BY:</span>
-            <select className="form-select border-0 bg-transparent fw-bold small" style={{ width: 'auto' }} value={sortBy} onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}>
-              <option value="default">DEFAULT</option>
-              <option value="New">NEWEST</option>
-              <option value="Sale">ON SALE</option>
-            </select>
-          </div>
-        </div>
-
-
-
-
-        {/* --- PRODUCT GRID --- */}
-
-
-
-        <div className="row g-4">
-
-          {paginatedProducts.length > 0 ? (
-
-            paginatedProducts.map((p, index) => (
-
-              <React.Fragment key={p.id}>
-
-                {/* Show subcategory title only when it changes */}
-                {category !== "all" &&
-                  (index === 0 || paginatedProducts[index - 1].subcategory !== p.subcategory) && (
-
-                    <h2 className="section-title w-100 mt-4">
-                      {p.subcategory}
-                    </h2>
-
-                  )}
-
-
-                <div className="col-xl-3 col-lg-4 col-6">
-
-                  <div className="product-item border-0 bg-white shadow-sm h-100 p-0 overflow-hidden">
-
-                    <div
-                      className="product-image position-relative overflow-hidden"
-                      style={{ height: "320px" }}
-                    >
-
-                      <img
-                        src={p.image}
-                        alt={p.pname}
-                        className="w-100 h-100 object-fit-cover"
-                        onMouseOver={(e) =>
-                          (e.target.src = p.secondImage || p.image)
-                        }
-                        onMouseOut={(e) =>
-                          (e.target.src = p.image)
-                        }
-                      />
-
-
-                      {/* Quick View */}
-                      <div className="quick-view-overlay d-flex align-items-center justify-content-center">
-
-                        <button
-                          className="btn btn-white rounded-pill shadow-sm p-3"
-                          onClick={() => {
-                            setSelectedProduct(p);
-                            setQuantity(1);
-                          }}
-                        >
-
-                          <i
-                            className="bi bi-eye fs-4"
-                            style={{ color: "var(--primary-green)" }}
-                          ></i>
-
-                        </button>
-
-                      </div>
-
-
+      
       {/* Shop Header - Clean & Simple */}
       <section className="shop-header py-4" style={{
         backgroundColor: 'var(--soft-beige)',
@@ -301,30 +181,31 @@ function Shop() {
         </div>
       </section>
 
-      {/* Search & Filters - FIXED */}
+      {/* Search & Filters */}
       <div className="container">
         <div className="shop-toolbar py-3" style={{
           borderTop: '1px solid rgba(45,64,46,0.08)',
           borderBottom: '1px solid rgba(45,64,46,0.08)'
         }}>
           
-          {/* Search Bar - FIXED */}
+          {/* Search Bar - FIXED: Better centering and visibility */}
           <div className="row justify-content-center mb-3">
-            <div className="col-lg-5 col-md-7">
+            <div className="col-lg-12 col-md-12 col-12">
               <div className="position-relative w-100">
                 <input 
                   type="text" 
                   className="form-control"
-                  placeholder="Search our botanical collection..."
+                  placeholder="Search our collection..."
                   style={{
                     border: '1px solid #eee',
                     borderRadius: '8px',
                     fontSize: '0.9rem',
-                    padding: '10px 45px 10px 45px',
+                    padding: '12px 45px 12px 45px',
                     transition: 'all 0.3s ease',
                     backgroundColor: 'white',
                     width: '100%',
-                    outline: 'none'
+                    outline: 'none',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
                   }}
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
@@ -334,7 +215,7 @@ function Shop() {
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = '#eee';
-                    e.target.style.boxShadow = 'none';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
                   }}
                 />
                 <i 
@@ -344,7 +225,7 @@ function Shop() {
                     color: '#999',
                     pointerEvents: 'none'
                   }}
-                ></i>
+                />
                 {searchTerm && (
                   <button
                     className="position-absolute top-50 end-0 translate-middle-y me-2 border-0 bg-transparent"
@@ -365,7 +246,6 @@ function Shop() {
 
           {/* Filters - In a Row */}
           <div className="d-flex flex-wrap justify-content-center align-items-center gap-2">
-            {/* Category Filter */}
             <div className="filter-group" style={{ minWidth: '160px' }}>
               <select 
                 className="form-select"
@@ -397,10 +277,10 @@ function Shop() {
                 <option value="Skin">SKIN CARE</option>
                 <option value="Lip">LIP CARE</option>
                 <option value="Body">BODY CARE</option>
+                <option value="Hair">HAIR CARE</option>
               </select>
             </div>
 
-            {/* Availability Filter */}
             <div className="filter-group" style={{ minWidth: '150px' }}>
               <select 
                 className="form-select"
@@ -434,7 +314,6 @@ function Shop() {
               </select>
             </div>
 
-            {/* Sort Filter */}
             <div className="filter-group" style={{ minWidth: '160px' }}>
               <select 
                 className="form-select"
@@ -474,293 +353,248 @@ function Shop() {
       {/* --- PRODUCT GRID --- */}
       <div className="container py-4">
         <div className="row g-4">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((p) => (
-                <div key={p.id} className="col-xl-3 col-lg-4 col-6">
-                    <div className="product-card" style={{
-                      backgroundColor: 'white',
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.06)',
-                      transition: 'all 0.4s ease',
-                      border: '1px solid rgba(45,64,46,0.06)',
-                      height: '100%'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-5px)';
-                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.06)';
+          {paginatedProducts.length > 0 ? (
+            paginatedProducts.map((p, index) => (
+              <React.Fragment key={p.id}>
+                {category !== "all" &&
+                  (index === 0 || paginatedProducts[index - 1]?.subcategory !== p.subcategory) && (
+                    <h2 className="section-title w-100 mt-4" style={{
+                      fontFamily: 'Playfair Display, serif',
+                      color: '#2D402E',
+                      fontSize: '1.5rem',
+                      fontWeight: '600',
+                      borderBottom: '2px solid #B4975A',
+                      paddingBottom: '10px',
+                      marginBottom: '20px'
                     }}>
-                        <div className="product-image position-relative overflow-hidden" style={{ height: '280px' }}>
-                            <img 
-                                src={p.image} 
-                                alt={p.pname} 
-                                className="w-100 h-100"
-                                style={{
-                                  objectFit: 'cover',
-                                  transition: 'transform 0.6s ease'
-                                }}
-                                onMouseOver={(e) => {
-                                  if (p.secondImage) {
-                                    e.target.src = p.secondImage;
-                                  }
-                                }} 
-                                onMouseOut={(e) => {
-                                  e.target.src = p.image;
-                                }} 
-                            />
-                            {/* Quick View Button */}
-                            <div className="quick-view-overlay d-flex align-items-center justify-content-center" style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              backgroundColor: 'rgba(45,64,46,0.3)',
-                              opacity: 0,
-                              transition: 'opacity 0.3s ease',
-                              zIndex: 2
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                            onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}>
-                                <button 
-                                  className="btn btn-white rounded-circle shadow-sm" 
-                                  onClick={() => { setSelectedProduct(p); setQuantity(1); }}
-                                  style={{
-                                    width: '50px',
-                                    height: '50px',
-                                    backgroundColor: 'white',
-                                    border: 'none',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transform: 'translateY(20px)',
-                                    transition: 'transform 0.4s ease'
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                  }}
-                                >
-                                    <i className="bi bi-eye" style={{ color: '#2D402E', fontSize: '1.2rem' }}></i>
-                                </button>
-                            </div>
-                        </div>
+                      {p.subcategory}
+                    </h2>
+                  )}
 
-                        <div className="p-3 text-center d-flex flex-column">
-                            <h6 className="fw-bold mb-1" style={{
-                              color: '#2D402E',
-                              fontSize: '0.85rem',
-                              fontFamily: 'Playfair Display, serif',
-                              minHeight: '2.5rem'
-                            }}>
-                                {p.pname}
-                            </h6>
-                            <p className="text-muted small mb-2" style={{ fontSize: '0.9rem' }}>
-                                Rs. {p.price}
-                            </p>
-                            
-                            <button 
-                                className="journal-link mt-auto mx-auto text-decoration-none border-0 bg-transparent" 
-                                onClick={() => navigate(`/product/${p.id}`)}
-                                style={{
-                                  color: '#2D402E',
-                                  fontSize: '0.7rem',
-                                  fontWeight: '600',
-                                  letterSpacing: '1px',
-                                  borderBottom: '2px solid #B4975A',
-                                  paddingBottom: '3px',
-                                  transition: 'all 0.3s ease',
-                                  cursor: 'pointer'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.target.style.color = '#B4975A';
-                                  e.target.style.borderBottomColor = '#2D402E';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.target.style.color = '#2D402E';
-                                  e.target.style.borderBottomColor = '#B4975A';
-                                }}
-                            >
-                                DISCOVER MORE —
-                            </button>
-                        </div>
+                <div className="col-xl-3 col-lg-4 col-6">
+                  <div className="product-card" style={{
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.06)',
+                    transition: 'all 0.4s ease',
+                    border: '1px solid rgba(45,64,46,0.06)',
+                    height: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.06)';
+                  }}>
+                    <div className="product-image position-relative overflow-hidden" style={{ height: '280px' }}>
+                      <img 
+                        src={p.image} 
+                        alt={p.pname} 
+                        className="w-100 h-100"
+                        style={{
+                          objectFit: 'cover',
+                          transition: 'transform 0.6s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          if (p.secondImage) {
+                            e.target.src = p.secondImage;
+                          }
+                        }} 
+                        onMouseOut={(e) => {
+                          e.target.src = p.image;
+                        }} 
+                      />
+                      <div className="quick-view-overlay d-flex align-items-center justify-content-center" style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(45,64,46,0.3)',
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                        zIndex: 2
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                      onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}>
+                        <button 
+                          className="btn btn-white rounded-circle shadow-sm" 
+                          onClick={() => { setSelectedProduct(p); setQuantity(1); }}
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transform: 'translateY(20px)',
+                            transition: 'transform 0.4s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                        >
+                          <i className="bi bi-eye" style={{ color: '#2D402E', fontSize: '1.2rem' }}></i>
+                        </button>
+                      </div>
                     </div>
 
-
-                    <div className="p-4 text-center">
-
-                      <h6
-                        className="fw-bold mb-1"
-                        style={{
-                          color: "var(--primary-green)",
-                          fontFamily: "Montserrat"
-                        }}
-                      >
+                    <div className="p-3 text-center d-flex flex-column">
+                      <h6 className="fw-bold mb-1" style={{
+                        color: '#2D402E',
+                        fontSize: '0.85rem',
+                        fontFamily: 'Playfair Display, serif',
+                        minHeight: '2.5rem'
+                      }}>
                         {p.pname}
                       </h6>
-
-
-                      <p className="text-muted small">
+                      <p className="text-muted small mb-2" style={{ fontSize: '0.9rem' }}>
                         Rs. {p.price}
                       </p>
-
-
+                      
+                      <button 
+                        className="journal-link mt-auto mx-auto text-decoration-none border-0 bg-transparent" 
+                        onClick={() => navigate(`/product/${p.id}`)}
+                        style={{
+                          color: '#2D402E',
+                          fontSize: '0.7rem',
+                          fontWeight: '600',
+                          letterSpacing: '1px',
+                          borderBottom: '2px solid #B4975A',
+                          paddingBottom: '3px',
+                          transition: 'all 0.3s ease',
+                          cursor: 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.color = '#B4975A';
+                          e.target.style.borderBottomColor = '#2D402E';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.color = '#2D402E';
+                          e.target.style.borderBottomColor = '#B4975A';
+                        }}
+                      >
+                        DISCOVER MORE —
+                      </button>
                     </div>
-
-
                   </div>
-
                 </div>
-
-
               </React.Fragment>
-
             ))
-
           ) : (
-
             <div className="text-center py-5 w-100">
-              <h4 className="text-muted">
-                No products found...
+              <i className="bi bi-box-seam" style={{ fontSize: '3rem', color: '#B4975A', opacity: 0.5 }}></i>
+              <h4 className="mt-3 text-muted" style={{ fontFamily: 'Playfair Display, serif' }}>
+                No products found in this ritual...
               </h4>
-                <i className="bi bi-box-seam" style={{ fontSize: '3rem', color: '#B4975A', opacity: 0.5 }}></i>
-                <h4 className="mt-3 text-muted" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  No products found in this ritual...
-                </h4>
-                <button 
-                  className="btn mt-3" 
-                  onClick={() => {setSearchTerm(""); setCategory("all")}}
-                  style={{
-                    backgroundColor: '#B4975A',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 25px',
-                    borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#2D402E'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#B4975A'}
-                >
-                  Clear Filters
-                </button>
+              <button 
+                className="btn mt-3" 
+                onClick={() => {setSearchTerm(""); setCategory("all"); setAvailability("all");}}
+                style={{
+                  backgroundColor: '#B4975A',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 25px',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#2D402E'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#B4975A'}
+              >
+                Clear Filters
+              </button>
             </div>
-
           )}
-
         </div>
 
         {/* --- PAGINATION --- */}
         {calculatedTotalPages > 1 && (
           <div className="d-flex justify-content-center gap-2 my-5">
-            <button className="btn btn-outline-dark rounded-0 px-4" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>
+            <button 
+              className="btn px-4 py-2" 
+              disabled={currentPage === 1} 
+              onClick={() => setCurrentPage(prev => prev - 1)}
+              style={{
+                backgroundColor: 'white',
+                color: '#666',
+                border: '1px solid #eee',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!e.target.disabled) {
+                  e.target.style.backgroundColor = '#2D402E';
+                  e.target.style.color = 'white';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.target.disabled) {
+                  e.target.style.backgroundColor = 'white';
+                  e.target.style.color = '#666';
+                }
+              }}
+            >
               <i className="bi bi-chevron-left"></i>
             </button>
             {[...Array(calculatedTotalPages)].map((_, index) => (
-              <button key={index + 1} className={`btn rounded-0 px-4 ${currentPage === index + 1 ? 'btn-dark' : 'btn-outline-dark'}`} style={{ backgroundColor: currentPage === index + 1 ? 'var(--primary-green)' : 'transparent' }} onClick={() => setCurrentPage(index + 1)}>
+              <button 
+                key={index + 1} 
+                className={`btn px-4 py-2`}
+                onClick={() => setCurrentPage(index + 1)}
+                style={{
+                  backgroundColor: currentPage === index + 1 ? '#2D402E' : 'white',
+                  color: currentPage === index + 1 ? 'white' : '#666',
+                  border: currentPage === index + 1 ? 'none' : '1px solid #eee',
+                  borderRadius: '8px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentPage !== index + 1) {
+                    e.target.style.backgroundColor = '#f5f5f5';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== index + 1) {
+                    e.target.style.backgroundColor = 'white';
+                  }
+                }}
+              >
                 {index + 1}
               </button>
             ))}
-            <button className="btn btn-outline-dark rounded-0 px-4" disabled={currentPage === calculatedTotalPages} onClick={() => setCurrentPage(prev => prev + 1)}>
+            <button 
+              className="btn px-4 py-2" 
+              disabled={currentPage === calculatedTotalPages} 
+              onClick={() => setCurrentPage(prev => prev + 1)}
+              style={{
+                backgroundColor: 'white',
+                color: '#666',
+                border: '1px solid #eee',
+                borderRadius: '8px',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!e.target.disabled) {
+                  e.target.style.backgroundColor = '#2D402E';
+                  e.target.style.color = 'white';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.target.disabled) {
+                  e.target.style.backgroundColor = 'white';
+                  e.target.style.color = '#666';
+                }
+              }}
+            >
               <i className="bi bi-chevron-right"></i>
             </button>
           </div>
-        )}
-      </div>
-
-      <QuickView
-        selectedProduct={selectedProduct}
-        setSelectedProduct={setSelectedProduct}
-        quantity={quantity}
-        setQuantity={setQuantity}
-        addToCart={addToCart}
-      />
-
-        {totalPages > 1 && (
-            <div className="d-flex justify-content-center gap-2 my-5">
-                <button 
-                  className="btn px-4 py-2" 
-                  disabled={currentPage === 1} 
-                  onClick={() => setCurrentPage(prev => prev - 1)}
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#666',
-                    border: '1px solid #eee',
-                    borderRadius: '8px',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.backgroundColor = '#2D402E';
-                      e.target.style.color = 'white';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.backgroundColor = 'white';
-                      e.target.style.color = '#666';
-                    }
-                  }}
-                >
-                    <i className="bi bi-chevron-left"></i>
-                </button>
-                {[...Array(totalPages)].map((_, index) => (
-                    <button 
-                      key={index + 1} 
-                      className={`btn px-4 py-2`}
-                      onClick={() => setCurrentPage(index + 1)}
-                      style={{
-                        backgroundColor: currentPage === index + 1 ? '#2D402E' : 'white',
-                        color: currentPage === index + 1 ? 'white' : '#666',
-                        border: currentPage === index + 1 ? 'none' : '1px solid #eee',
-                        borderRadius: '8px',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (currentPage !== index + 1) {
-                          e.target.style.backgroundColor = '#f5f5f5';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (currentPage !== index + 1) {
-                          e.target.style.backgroundColor = 'white';
-                        }
-                      }}
-                    >
-                        {index + 1}
-                    </button>
-                ))}
-                <button 
-                  className="btn px-4 py-2" 
-                  disabled={currentPage === totalPages} 
-                  onClick={() => setCurrentPage(prev => prev + 1)}
-                  style={{
-                    backgroundColor: 'white',
-                    color: '#666',
-                    border: '1px solid #eee',
-                    borderRadius: '8px',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.backgroundColor = '#2D402E';
-                      e.target.style.color = 'white';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.backgroundColor = 'white';
-                      e.target.style.color = '#666';
-                    }
-                  }}
-                >
-                    <i className="bi bi-chevron-right"></i>
-                </button>
-            </div>
         )}
       </div>
 

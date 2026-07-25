@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+
 import head from './../../assets/about_page/about-head-shape.webp';
 import about1 from './../../assets/about_page/about_img2.jpeg';
 import about2 from './../../assets/about_page/about_img3.png';

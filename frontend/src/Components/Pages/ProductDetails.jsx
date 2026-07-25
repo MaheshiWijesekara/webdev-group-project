@@ -4,7 +4,7 @@ import axios from "axios";
 import { AuthContext } from "../../AuthContext";
 import { toast, ToastContainer } from "react-toastify";
 import Navbar from "../Nav/Nav";
-import Breadcrumbs from "../Features/Breadcrumbs";
+import Breadcrumbs from "../Features/Breadcrumbs"; // Make sure this path is correct
 
 function ProductDetails() {
   const { id } = useParams();
@@ -130,7 +130,7 @@ function ProductDetails() {
     <>
       <Navbar />
       
-      {/* Breadcrumbs */}
+      {/* Breadcrumbs - Fixed with correct path */}
       <Breadcrumbs customTitle={product.pname} />
 
       {/* Product Details */}
@@ -443,7 +443,7 @@ function ProductDetails() {
                     <p className="text-muted mt-2 mb-0">No reviews yet for this product. Be the first to share your experience!</p>
                   </div>
                 ) : (
-                  reviews.map((r, index) => (
+                  reviews.map((r) => (
                     <div 
                       key={r.id} 
                       className="mb-3 p-3"

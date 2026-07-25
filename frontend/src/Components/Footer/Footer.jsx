@@ -33,6 +33,7 @@ function Footer() {
             <div className="footer mt-5 py-5">
                 <div className="container">
                     <div className="row gy-4">
+                        {/* Company - Fixed column structure */}
                         <div className="col-lg-8">
                             <div className="row">
                                 {/* Company */}
@@ -104,43 +105,7 @@ function Footer() {
                             </div>
                         </div>
 
-                        <div className="col-md-4">
-                            <h3 className="mb-3">Useful Links</h3>
-                            <ul className="list-unstyled">
-                                <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- New Arrivals</a>
-                                </li>
-                                <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Best Sellers</a>
-                                </li>
-                                <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Bundle & Save</a>
-                                </li>
-                                <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Online Gift Cards</a>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div className="col-md-4">
-                            <h3 className="mb-3">Information</h3>
-                            <ul className="list-unstyled">
-                                <li className="mb-2">
-                                    <Link to="/Contact#returns" className="text-decoration-none">- Start a Return</Link>
-                                </li>
-                                <li className="mb-2">
-                                    <Link to="/contact" className="text-decoration-none">- Contact Us</Link>
-                                    
-                                </li>
-                                <li className="mb-2">
-                                    <Link to="/Contact#faq" className="text-decoration-none">- Shipping FAQ</Link>
-                                </li>
-                                
-                                <li className="mb-2">
-                                    <a href="#" className="text-decoration-none">- Privacy Policy</a>
-                                </li>
-                            </ul>
-                        {/* Newsletter */}
+                        {/* Newsletter Section - Fixed */}
                         <div className="col-lg-4">
                             <h3 className="mb-4">Subscribe to our newsletter</h3>
                             <p className="mb-5">Enter your email to get the latest news, updates and special offers delivered directly in your inbox</p>
@@ -158,10 +123,11 @@ function Footer() {
                         </div>
                     </div>
 
+                    {/* Footer Bottom - Fixed structure */}
                     <div className="footer-bottom mt-5">
                         <div className="row align-items-start">
                             <div className="col-lg-4">
-                                <div className="footer-icon-text d-flex gap-3 justify-content-center justify-content-lg-end">
+                                <div className="footer-icon-text d-flex gap-3 justify-content-center justify-content-lg-start">
                                     <p>Copyright © 2026, All Rights Reserved</p>
                                     <div className="footer-icons d-flex gap-2">
                                         <a href="#" className="text-decoration-none" style={{ color: '#d0d0d0' }}>

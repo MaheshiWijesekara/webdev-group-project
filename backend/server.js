@@ -215,6 +215,23 @@ app.post('/api/blogs', upload.single('image'), (req, res) => {
     });
 });
 
+// --- DELETE BLOG ROUTE ---
+app.delete('/api/blogs/:id', (req, res) => {
+    const sql = "DELETE FROM blogs WHERE id = ?";
+    db.query(sql, [req.params.id], (err, result) => {
+        if (err) {
+            console.error("Delete Error:", err);
+            return res.status(500).json({ error: "Failed to delete blog: " + err.message });
+        }
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Blog not found" });
+        }
+        
+        res.json({ message: "Blog deleted successfully!" });
+    });
+});
+
 
 
 // --- ORDER ROUTES ---

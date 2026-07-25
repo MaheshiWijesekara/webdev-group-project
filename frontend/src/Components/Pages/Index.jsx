@@ -6,13 +6,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import QuickView from "../Features/QuickView";
 
-
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/effect-fade";
-
-// data - MAKE SURE THIS PATH IS EXACTLY CORRECT
-// import Products from "./../../Products.json";
 
 import subBanner1 from "./../../assets/main_page/banner1.png";
 import subBanner2 from "./../../assets/main_page/banner2.png";
@@ -42,7 +38,6 @@ function Index() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
-
 
   const addToWishlist = (product) => {
     try {
@@ -78,15 +73,14 @@ function Index() {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     fetch('http://localhost:5000/api/products')
       .then(response => response.json())
       .then(data => {
-        // Check if data.products exists (because of your new backend format)
         if (data && data.products) {
           setProducts(data.products);
         } else {
-          setProducts(data); // Fallback if backend isn't paginated
+          setProducts(data);
         }
       })
       .catch(err => console.log("Error fetching data:", err));
@@ -94,7 +88,7 @@ function Index() {
 
   // Social images array
   const socialImages = [
-    socialImage1, socialImage2, socialImage3, 
+    socialImage1, socialImage2, socialImage3,
     socialImage4, socialImage5, socialImage1
   ];
 
@@ -190,8 +184,8 @@ function Index() {
             }}
           >
             {Array.isArray(products) && products.filter(
-                          (p) => Number(p.id) >= 1 && Number(p.id) <= 10,
-                        ).map((product) => (
+              (p) => Number(p.id) >= 1 && Number(p.id) <= 10,
+            ).map((product) => (
               <SwiperSlide key={product.id}>
                 <div className="product-item text-center">
                   <div className="product-image overflow-hidden position-relative" style={{
@@ -204,11 +198,13 @@ function Index() {
                       className="img-fluid"
                       alt={product.pname}
                     />
-                    <img
-                      src={product.secondImage}
-                      className="img-fluid"
-                      alt=""
-                    />
+                    {product.secondImage && (
+                      <img
+                        src={product.secondImage}
+                        className="img-fluid"
+                        alt=""
+                      />
+                    )}
 
                     <div className="product-icons d-flex gap-2">
                       <div
@@ -257,7 +253,6 @@ function Index() {
                 className="img-fluid rounded banner-img"
                 style={{ borderRadius: '12px' }}
               />
-
               <div className="banner-content position-absolute">
                 <h3>NEW COLLECTION</h3>
                 <h1>
@@ -276,33 +271,14 @@ function Index() {
                 className="img-fluid rounded banner-img"
                 style={{ borderRadius: '12px' }}
               />
-
-            </div>
-            <div className="d-flex justify-content-around text-center flex-wrap mt-4">
-
-              <div>
-                <h4>New Collection</h4>
-                <p>Discover our latest skincare essentials.</p>
-                <Link to="/stores" className="btn">
-                  Visit Store
-                </Link>
-              </div>
-
-              <div>
-                <h4>25% Off Everything</h4>
-                <p>Refresh your beauty routine with our favourites.</p>
-                <Link to="/Shop" className="btn">
-                  Shop Now
-                </Link>
               <div className="banner-content banner-content2 position-absolute">
                 <h1>25% off everything</h1>
                 <p>
                   Makeup with extended range in <br /> colors for every skin
                   tone
                 </p>
-                <button className="btn banner-btn mt-2">SHOP NOW</button>
+                <Link to="/Shop" className="btn banner-btn mt-2">SHOP NOW</Link>
               </div>
-
             </div>
           </div>
         </div>
@@ -487,8 +463,8 @@ function Index() {
             <div className="col-lg-7">
               <div className="row g-3">
                 {Array.isArray(products) && products.filter(
-                                  (p) => p.category === 'Hair'
-                                ).slice(0, 6).map((product) => (
+                  (p) => p.category === 'Hair'
+                ).slice(0, 6).map((product) => (
                   <div key={product.id} className="col-md-4 col-6 mb-3">
                     <div className="product-item text-center h-100" style={{
                       backgroundColor: 'white',
@@ -516,11 +492,13 @@ function Index() {
                           className="img-fluid"
                           alt={product.pname}
                         />
-                        <img
-                          src={product.secondImage}
-                          className="img-fluid"
-                          alt=""
-                        />
+                        {product.secondImage && (
+                          <img
+                            src={product.secondImage}
+                            className="img-fluid"
+                            alt=""
+                          />
+                        )}
 
                         <div className="quick-view-overlay d-flex align-items-center justify-content-center">
                           <button
@@ -536,7 +514,6 @@ function Index() {
                             ></i>
                           </button>
                         </div>
-
                       </div>
 
                       <Link
@@ -559,36 +536,7 @@ function Index() {
         </div>
       </div>
 
-
-      {/* discover */}
-
-      <div className="discover container py-2">
-        <div className="section-title mb-5 favourite-beauty-title text-center">
-          <h2 className="fw-semibold fs-1">More to Discover</h2>
-          <p className="text-center">Our bundles were designed to conveniently package <br /> your tanning essentials while saving you money</p>
-        </div>
-        <div className="row g-5">
-          <div className="col-md-6 discover-card text-center">
-            <div className="discover-img section-image rounded">
-              <img src={discover1} alt="summer collection" className="img-fluid rounded" />
-            </div>
-            <div className="discover-info mt-3">
-              <div>Summer Collection</div>
-              <Link to="/shop" className="btn mt-2"> Shop now <i className="bi bi-arrow-right ms-2"></i></Link>
-            </div>
-          </div>
-          <div className="col-md-6 discover-card text-center">
-            <div className="discover-img section-image rounded">
-              <img src={discover2} alt="from our blog" className="img-fluid rounded" />
-            </div>
-            <div className="discover-info mt-3">
-              <div>Discover beauty secrets</div>
-              <Link to="/blog" className="btn mt-2"> Read our blog <i className="bi bi-arrow-right ms-2"></i></Link>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Discover Section - FIXED BUTTONS */}
+      {/* Discover Section - FIXED */}
       <div className="discover container py-5">
         <div className="section-title mb-5 favourite-beauty-title text-center">
           <span className="d-inline-block mb-2" style={{
@@ -614,7 +562,6 @@ function Index() {
             </div>
             <div className="discover-info mt-3">
               <div style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E', fontSize: '1.8rem' }}>Summer Collection</div>
-              {/* FIXED: Link to Shop */}
               <Link 
                 to="/Shop" 
                 className="btn mt-2"
@@ -641,7 +588,6 @@ function Index() {
             </div>
             <div className="discover-info mt-3">
               <div style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E', fontSize: '1.8rem' }}>From Our Blog</div>
-              {/* FIXED: Link to Blog */}
               <Link 
                 to="/Blog" 
                 className="btn mt-2"
@@ -665,48 +611,6 @@ function Index() {
         </div>
       </div>
 
-
-      {/* social */}
-      <div className="social-image-container py-5 px-5 mx-auto">
-        <div className="row g-4">
-          <div className="col-lg-2 cool-md-4">
-            <div className="social-wrapper position-relative overflow-hidden">
-              <img src={socialImage1} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 cool-md-4">
-            <div className="social-wrapper position-relative overflow-hidden">
-              <img src={socialImage2} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 cool-md-4">
-            <div className="social-wrapper position-relative overflow-hidden">
-              <img src={socialImage3} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 cool-md-4">
-            <div className="social-wrapper position-relative overflow-hidden">
-              <img src={socialImage4} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 cool-md-4">
-            <div className="social-wrapper position-relative overflow-hidden">
-              <img src={socialImage5} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 cool-md-4">
-            <div className="social-wrapper position-relative overflow-hidden">
-              <img src={socialImage1} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-        </div>
-      </div>
       {/* Social Section - WITH INSTAGRAM HOVER EFFECT */}
       <div className="social-image-container py-5 px-5 mx-auto">
         <div className="row g-3">
@@ -731,7 +635,6 @@ function Index() {
                     transition: 'transform 0.6s ease'
                   }}
                 />
-                {/* Instagram Overlay - Appears on hover */}
                 <div 
                   className="social-overlay"
                   style={{
@@ -750,11 +653,13 @@ function Index() {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.opacity = '1';
-                    e.currentTarget.previousElementSibling.style.transform = 'scale(1.05)';
+                    const img = e.currentTarget.previousElementSibling;
+                    if (img) img.style.transform = 'scale(1.05)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.opacity = '0';
-                    e.currentTarget.previousElementSibling.style.transform = 'scale(1)';
+                    const img = e.currentTarget.previousElementSibling;
+                    if (img) img.style.transform = 'scale(1)';
                   }}
                 >
                   <i 

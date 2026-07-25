@@ -3,8 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../Nav/Nav';
 import { toast, ToastContainer } from 'react-toastify';
 import Breadcrumbs from '../Features/Breadcrumbs';
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
-import { toast, ToastContainer } from 'react-toastify';
+
 
 function Contact() {
   const { hash } = useLocation();

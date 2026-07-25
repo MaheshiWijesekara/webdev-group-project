@@ -14,10 +14,11 @@ function Blog() {
     const [newBlog, setNewBlog] = useState({
         name: '',
         title: '',
-        content: '' // Added content field
+        content: ''
     });
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
     const fetchBlogs = () => {
         axios.get('http://localhost:5000/api/blogs')
@@ -37,7 +38,6 @@ function Blog() {
     const openBlogPopup = async (blog) => {
         setLoading(true);
         try {
-            // If the blog already has content, use it
             if (blog.content) {
                 setSelectedBlog(blog);
                 document.body.style.overflow = 'hidden';
@@ -45,13 +45,11 @@ function Blog() {
                 return;
             }
             
-            // Otherwise fetch full content from API
             const response = await axios.get(`http://localhost:5000/api/blogs/${blog.id}`);
             setSelectedBlog(response.data);
             document.body.style.overflow = 'hidden';
         } catch (err) {
             console.error("Error fetching blog content:", err);
-            // Fallback: use the blog data we already have
             setSelectedBlog(blog);
         } finally {
             setLoading(false);
@@ -62,6 +60,26 @@ function Blog() {
     const closeBlogPopup = () => {
         setSelectedBlog(null);
         document.body.style.overflow = 'auto';
+    };
+
+    // --- DELETE BLOG FUNCTION ---
+    const deleteBlog = async (blogId) => {
+        if (!window.confirm("Are you sure you want to delete this article? This action cannot be undone.")) {
+            return;
+        }
+
+        setDeleting(true);
+        try {
+            await axios.delete(`http://localhost:5000/api/blogs/${blogId}`);
+            toast.success("Article deleted successfully!");
+            fetchBlogs(); // Refresh the list
+            closeBlogPopup(); // Close popup if open
+        } catch (err) {
+            console.error("Delete Error:", err);
+            toast.error(err.response?.data?.error || "Failed to delete article");
+        } finally {
+            setDeleting(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -103,7 +121,7 @@ function Blog() {
             {/* Breadcrumbs */}
             <Breadcrumbs />
 
-            {/* Blog Header - Clean & Simple */}
+            {/* Blog Header */}
             <section className="blog-header py-4" style={{
                 backgroundColor: 'var(--soft-beige)',
                 paddingTop: '30px',
@@ -142,7 +160,7 @@ function Blog() {
                 </div>
             </section>
 
-            {/* Blog Toolbar - Categories & Write Button */}
+            {/* Blog Toolbar */}
             <div className="container">
                 <div className="d-flex flex-wrap justify-content-between align-items-center py-3" style={{
                     borderTop: '1px solid rgba(45,64,46,0.08)',
@@ -396,22 +414,53 @@ function Blog() {
                             }}>
                                 {selectedBlog.title}
                             </span>
-                            <button
-                                onClick={closeBlogPopup}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    fontSize: '1.5rem',
-                                    cursor: 'pointer',
-                                    color: '#666',
-                                    padding: '5px 10px',
-                                    transition: 'all 0.3s ease'
-                                }}
-                                onMouseEnter={(e) => e.target.style.color = '#dc3545'}
-                                onMouseLeave={(e) => e.target.style.color = '#666'}
-                            >
-                                ✕
-                            </button>
+                            <div className="d-flex align-items-center gap-2">
+                                {/* DELETE BUTTON - Only show if user is the author */}
+                                {user && selectedBlog.author && selectedBlog.author.includes(user.name) && (
+                                    <button
+                                        onClick={() => deleteBlog(selectedBlog.id)}
+                                        disabled={deleting}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: '#dc3545',
+                                            fontSize: '0.85rem',
+                                            fontWeight: '500',
+                                            cursor: 'pointer',
+                                            padding: '5px 10px',
+                                            transition: 'all 0.3s ease',
+                                            borderRadius: '6px'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.backgroundColor = '#dc3545';
+                                            e.target.style.color = 'white';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.backgroundColor = 'transparent';
+                                            e.target.style.color = '#dc3545';
+                                        }}
+                                    >
+                                        <i className="bi bi-trash3 me-1"></i>
+                                        {deleting ? 'Deleting...' : 'Delete'}
+                                    </button>
+                                )}
+                                <button
+                                    onClick={closeBlogPopup}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        fontSize: '1.5rem',
+                                        cursor: 'pointer',
+                                        color: '#666',
+                                        padding: '5px 10px',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.color = '#dc3545'}
+                                    onMouseLeave={(e) => e.target.style.color = '#666'}
+                                >
+                                    ✕
+                                </button>
+                            </div>
                         </div>
 
                         {/* Popup Content */}

@@ -6,8 +6,7 @@ import store3 from './../../assets/store_page/store3.png';
 import {Link} from 'react-router-dom'
 
 import Breadcrumbs from '../Features/Breadcrumbs';
-import { Link } from 'react-router-dom'
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+
 
 function Stores() {
   return (

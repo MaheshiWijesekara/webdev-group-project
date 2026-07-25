@@ -1,6 +1,6 @@
-// Components/Breadcrumbs/Breadcrumbs.jsx - Super Compact Version
+// Components/Breadcrumbs/Breadcrumbs.jsx
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Breadcrumbs = ({ 
   customTitle, 
@@ -8,122 +8,68 @@ const Breadcrumbs = ({
   paddingTop = '5px'
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const pathnames = location.pathname.split('/').filter(x => x);
 
-  const getBreadcrumbStructure = () => {
-    const currentPath = location.pathname;
+  const getBreadcrumbs = () => {
+    // Always start with Home
+    const items = [{ name: 'Home', path: '/', isActive: false }];
 
-    // Product Details: Home / Shop All / Product Name
-    if (pathnames.length >= 2 && pathnames[0] === 'product' && /^\d+$/.test(pathnames[1])) {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'Shop All', path: '/shop' },
-        { name: customTitle || `Product #${pathnames[1]}`, path: currentPath, isActive: true }
-      ];
+    // If we're on product page
+    if (pathnames[0] === 'product' && pathnames[1] && /^\d+$/.test(pathnames[1])) {
+      items.push({ name: 'Shop All', path: '/shop', isActive: false });
+      items.push({ name: customTitle || `Product #${pathnames[1]}`, path: location.pathname, isActive: true });
+      return items;
     }
 
-    // Checkout: Home / Cart / Checkout
-    if (currentPath === '/checkout') {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'Cart', path: '/cart' },
-        { name: 'Checkout', path: '/checkout', isActive: true }
-      ];
+    // If we're on checkout page
+    if (pathnames[0] === 'checkout') {
+      items.push({ name: 'Cart', path: '/cart', isActive: false });
+      items.push({ name: 'Checkout', path: '/checkout', isActive: true });
+      return items;
     }
 
-    // Cart: Home / Cart
-    if (currentPath === '/cart') {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'Cart', path: '/cart', isActive: true }
-      ];
-    }
+    // For all other pages, build from path
+    const routeNames = {
+      'shop': 'Shop All',
+      'about': 'About',
+      'blog': 'Blog',
+      'contact': 'Contact',
+      'cart': 'Cart',
+      'wishlist': 'Wishlist',
+      'profile': 'My Account',
+      'stores': 'Stores'
+    };
 
-    // Wishlist: Home / Wishlist
-    if (currentPath === '/wishlist') {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'Wishlist', path: '/wishlist', isActive: true }
-      ];
-    }
-
-    // Profile: Home / My Account
-    if (currentPath === '/profile') {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'My Account', path: '/profile', isActive: true }
-      ];
-    }
-
-    // Shop: Home / Shop All
-    if (currentPath === '/shop') {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'Shop All', path: '/shop', isActive: true }
-      ];
-    }
-
-    // Stores: Home / Stores
-    if (currentPath === '/stores') {
-      return [
-        { name: 'Home', path: '/' },
-        { name: 'Stores', path: '/stores', isActive: true }
-      ];
-    }
-
-    // Other pages: Home / Page Name
-    if (pathnames.length === 1) {
-      const nameMap = {
-        'about': 'About',
-        'blog': 'Blog',
-        'contact': 'Contact',
-        'admin-virelle-hidden': 'Admin Panel'
-      };
-      
-      const pageName = nameMap[pathnames[0]] || pathnames[0].charAt(0).toUpperCase() + pathnames[0].slice(1);
-      
-      return [
-        { name: 'Home', path: '/' },
-        { name: pageName, path: currentPath, isActive: true }
-      ];
-    }
-
-    // Fallback: Build from path segments
-    const structure = [];
-    let currentPathBuild = '';
-    
+    let currentPath = '';
     pathnames.forEach((segment, index) => {
-      currentPathBuild += `/${segment}`;
+      currentPath += `/${segment}`;
       const isLast = index === pathnames.length - 1;
       
-      const nameMap = {
-        'shop': 'Shop All',
-        'about': 'About',
-        'blog': 'Blog',
-        'contact': 'Contact',
-        'cart': 'Cart',
-        'checkout': 'Checkout',
-        'wishlist': 'Wishlist',
-        'profile': 'My Account',
-        'admin-virelle-hidden': 'Admin Panel',
-        'stores': 'Stores',
-        'product': 'Product'
-      };
+      // Skip if it's a product ID (already handled above)
+      if (/^\d+$/.test(segment) && pathnames[0] === 'product') return;
       
-      let name = nameMap[segment] || segment;
+      let name = routeNames[segment] || segment;
       name = name.charAt(0).toUpperCase() + name.slice(1);
       
-      structure.push({
-        name: name,
-        path: currentPathBuild,
-        isActive: isLast
-      });
+      items.push({ name, path: currentPath, isActive: isLast });
     });
-    
-    return structure;
+
+    // If only Home exists (we're on home page), make it active
+    if (items.length === 1) {
+      items[0].isActive = true;
+    }
+
+    return items;
   };
 
-  const breadcrumbs = getBreadcrumbStructure();
+  const breadcrumbs = getBreadcrumbs();
+
+  // Handle navigation with proper click
+  const handleNavigation = (e, path) => {
+    e.preventDefault();
+    navigate(path);
+  };
 
   return (
     <div 
@@ -131,10 +77,9 @@ const Breadcrumbs = ({
       style={{ 
         backgroundColor: backgroundColor,
         paddingTop: paddingTop,
-        // REMOVED border-bottom for even more compact look
       }}
     >
-      <div className="container" style={{ padding: '4px 15px' }}> {/* EXTRA COMPACT */}
+      <div className="container" style={{ padding: '4px 15px' }}>
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb mb-0" style={{ 
             fontSize: '0.8rem',
@@ -160,7 +105,13 @@ const Breadcrumbs = ({
                     className="text-decoration-none"
                     style={{ 
                       color: '#666',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer'
+                    }}
+                    onClick={(e) => {
+                      // Prevent default and use navigate for smooth routing
+                      e.preventDefault();
+                      navigate(item.path);
                     }}
                     onMouseEnter={(e) => e.target.style.color = '#B4975A'}
                     onMouseLeave={(e) => e.target.style.color = '#666'}
