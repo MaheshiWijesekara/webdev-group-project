@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../../AuthContext';
 import Navbar from '../Nav/Nav';
 import { toast, ToastContainer } from 'react-toastify';
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+import Breadcrumbs from '../Features/Breadcrumbs';
 
 function Profile() {
     const { user, login } = useContext(AuthContext);

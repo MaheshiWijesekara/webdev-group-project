@@ -3,7 +3,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../Nav/Nav"; // 1. Added Import
 import { Link } from "react-router-dom"; // Added for navigation
-import Breadcrumbs from "../Breadcrumbs/Breadcrumbs"; 
+import Breadcrumbs from "../Features/Breadcrumbs"; 
 function Wishlist() {
   const [wishlist, setWishlist] = useState([]);
   const [cart, setCart] = useState([]);

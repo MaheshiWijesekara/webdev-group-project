@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../AuthContext";
 import Navbar from "../Nav/Nav";
-import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
+import Breadcrumbs from "../Features/Breadcrumbs";
 
 function Checkout() {
   const { user } = useContext(AuthContext);

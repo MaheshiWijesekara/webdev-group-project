@@ -14,11 +14,15 @@ import Blog from "./Components/Pages/Blog";
 import Contact from "./Components/Pages/Contact";
 import Profile from "./Components/Pages/Profile";
 import Admin from "./Components/Pages/Admin";
+import ScrollToTop from "./Components/Features/ScrollToTop";
 
 function App() {
   return (
     <>
       <Nav />
+
+      <ScrollToTop />
+      
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/product/:id" element={<ProductDetails />} />

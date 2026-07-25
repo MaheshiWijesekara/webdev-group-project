@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 import head from './../../assets/about_page/about-head-shape.webp';
-import about1 from './../../assets/about_page/about_img2.jpg';
+import about1 from './../../assets/about_page/about_img2.jpeg';
 import about2 from './../../assets/about_page/about_img3.png';
 import client1 from './../../assets/about_page/brand-logo-1.png';
 import client2 from './../../assets/about_page/brand-logo-2.png';
@@ -10,7 +10,7 @@ import client4 from './../../assets/about_page/brand-logo-4.png';
 import client5 from './../../assets/about_page/brand-logo-5.png';
 import client6 from './../../assets/about_page/brand-logo-6.png';
 
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+import Breadcrumbs from '../Features/Breadcrumbs';
 
 const About = () => {
 

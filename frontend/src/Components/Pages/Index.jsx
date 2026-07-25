@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Navigation } from "swiper/modules";
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 // Toastify
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import QuickView from "../Features/QuickView";
+
 
 // Swiper styles
 import "swiper/css";
@@ -14,8 +16,8 @@ import "swiper/css/effect-fade";
 // data - MAKE SURE THIS PATH IS EXACTLY CORRECT
 // import Products from "./../../Products.json";
 
-import subBanner1 from "./../../assets/banner-1.webp";
-import subBanner2 from "./../../assets/banner-2.webp";
+import subBanner1 from "./../../assets/main_page/banner1.png";
+import subBanner2 from "./../../assets/main_page/banner2.png";
 
 import serviceImg1 from "./../../assets/service-icon-1.svg";
 import serviceImg2 from "./../../assets/service-icon-2.svg";
@@ -26,20 +28,23 @@ import brand1 from "./../../assets/brand-1.png";
 import brand2 from "./../../assets/brand-2.png";
 import brand3 from "./../../assets/brand-3.png";
 
-import femalebanner from "./../../assets/banner-female.webp";
+import femalebanner from "./../../assets/main_page/main_female.jpeg";
 
-import discover1 from "./../../assets/discover-1.webp";
-import discover2 from "./../../assets/discover-2.webp";
+import discover1 from "./../../assets/main_page/discover1.png";
+import discover2 from "./../../assets/main_page/discover2.jpeg";
 
 import socialImage1 from "./../../assets/social-image-1.jpg";
-import socialImage2 from "./../../assets/social-image-2.jpg";
+import socialImage2 from "./../../assets/main_page/discover2.jpg";
 import socialImage3 from "./../../assets/social-image-3.jpg";
 import socialImage4 from "./../../assets/social-image-4.jpg";
 import socialImage5 from "./../../assets/social-image-5.jpg";
 
 function Index() {
-  const navigate = useNavigate();
   const [products, setProducts] = useState([]); // Start with an empty array
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const navigate = useNavigate();
+
 
   const addToWishlist = (product) => {
     try {
@@ -75,18 +80,18 @@ function Index() {
     }
   };
 
- useEffect(() => {
+  useEffect(() => {
     fetch('http://localhost:5000/api/products')
-        .then(response => response.json())
-        .then(data => {
-            // Check if data.products exists (because of your new backend format)
-            if (data && data.products) {
-                setProducts(data.products); 
-            } else {
-                setProducts(data); // Fallback if backend isn't paginated
-            }
-        })
-        .catch(err => console.log("Error fetching data:", err));
+      .then(response => response.json())
+      .then(data => {
+        // Check if data.products exists (because of your new backend format)
+        if (data && data.products) {
+          setProducts(data.products);
+        } else {
+          setProducts(data); // Fallback if backend isn't paginated
+        }
+      })
+      .catch(err => console.log("Error fetching data:", err));
   }, []);
 
   return (
@@ -169,8 +174,8 @@ function Index() {
           >
             {/* SAFE FILTER: Convert ID to Number to ensure comparison works */}
             {Array.isArray(products) && products.filter(
-  (p) => Number(p.id) >= 1 && Number(p.id) <= 10,
-).map((product) => (
+              (p) => Number(p.id) >= 1 && Number(p.id) <= 10,
+            ).map((product) => (
               <SwiperSlide key={product.id}>
                 <div className="product-item text-center">
                   <div className="product-image overflow-hidden position-relative">
@@ -206,7 +211,7 @@ function Index() {
                     className="text-decoration-none text-dark"
                   >
                     <div className="product-content pt-3">
-                      <span className="d-block fw-bold">{product.price}</span>
+                      <span className="d-block fw-bold">Rs. {product.price}</span>
                       <h3 className="fs-6 mt-1">{product.pname}</h3>
                     </div>
                   </Link>
@@ -219,8 +224,12 @@ function Index() {
 
       {/* banner */}
 
-      <div className="banners py-5">
+      <div className="banners py-3">
         <div className="container">
+          <div className="text-center mb-4">
+            <h2 className="fw-semibold fs-1">Seasonal Highlights</h2>
+            <p className="text-muted">Fresh picks and beauty favorites for every season</p>
+          </div>
           <div className="row">
             <div className="col-lg-6 banner-card overflow-hidden position-relative">
               <img
@@ -228,16 +237,7 @@ function Index() {
                 alt="banner"
                 className="img-fluid rounded banner-img"
               />
-              <div className="banner-content position-absolute">
-                <h3>NEW COLLECTION</h3>
-                <h1>
-                  Intensive Glow C+ <br /> Serum
-                  <br />
-                </h1>
-                <button className="btn banner-btn mt-2">
-                  EXPLORE MORE
-                  </button>
-              </div>
+
             </div>
 
             <div className="col-lg-6 banner-card overflow-hidden position-relative banner-mt">
@@ -246,15 +246,26 @@ function Index() {
                 alt="banner"
                 className="img-fluid rounded banner-img"
               />
-              <div className="banner-content banner-content2 position-absolute">
-                <h1>25% off everything</h1>
-                <p>
-                  Makeup with extended range in <br /> colors for every skin
-                  tone
-                </p>
-                <br />
-                <button className="btn banner-btn mt-2">SHOP NOW</button>
+
+            </div>
+            <div className="d-flex justify-content-around text-center flex-wrap mt-4">
+
+              <div>
+                <h4>New Collection</h4>
+                <p>Discover our latest skincare essentials.</p>
+                <Link to="/stores" className="btn">
+                  Visit Store
+                </Link>
               </div>
+
+              <div>
+                <h4>25% Off Everything</h4>
+                <p>Refresh your beauty routine with our favourites.</p>
+                <Link to="/Shop" className="btn">
+                  Shop Now
+                </Link>
+              </div>
+
             </div>
           </div>
         </div>
@@ -342,19 +353,15 @@ function Index() {
             <div className="col-lg-5">
               <div className="favourite-beauty-banner mb-lg-0 mb-5 position-relative">
                 <img src={femalebanner} className="img-fluid" alt="" />
-                <div className="favourite-beauty-banner-title">
-                  <h3 className="fs-2">Empower Yourself</h3>
-                  <p className="fs-6">Get the skin you deserve</p>
-                  <button className="btn btn-default">Explore</button>
-                </div>
+
               </div>
             </div>
 
             <div className="col-lg-7">
               <div className="row">
                 {Array.isArray(products) && products.filter(
-  (p) => p.category === 'Skin' // Or whatever category you have in your DB
-).slice(0, 6).map((product) => (
+                  (p) => p.category === 'Hair' // Or whatever category you have in your DB
+                ).slice(0, 6).map((product) => (
                   <div key={product.id} className="col-md-4 col-6 mb-4">
                     <div className="product-item text-center h-100 shadow-sm p-2 rounded">
                       <div className="product-image overflow-hidden position-relative">
@@ -369,15 +376,21 @@ function Index() {
                           alt=""
                         />
 
-                        <div className="product-icons d-flex gap-2">
-                          
-                          <div
-                            className="product-icon"
-                            onClick={() => addToCart(product)}
+                        <div className="quick-view-overlay d-flex align-items-center justify-content-center">
+                          <button
+                            className="btn btn-white rounded-pill shadow-sm p-3"
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setQuantity(1);
+                            }}
                           >
-                            <i className="bi bi-cart"></i>
-                          </div>
+                            <i
+                              className="bi bi-eye fs-4"
+                              style={{ color: "var(--primary-green)" }}
+                            ></i>
+                          </button>
                         </div>
+
                       </div>
 
                       <Link
@@ -385,7 +398,7 @@ function Index() {
                         className="text-decoration-none text-dark"
                       >
                         <div className="product-content pt-3">
-                          <span className="d-block fw-bold">
+                          <span className="d-block fw-bold"> Rs.
                             {product.price}
                           </span>
                           <h3 className="fs-6 mt-1">{product.pname}</h3>
@@ -403,75 +416,83 @@ function Index() {
 
       {/* discover */}
 
-        <div className="discover container py-5">
-          <div className="section-title mb-5 favourite-beauty-title text-center">
-            <h2 className="fw-semibold fs-1">More to Discover</h2>
-            <p className="text-center">Our bundles were designed to conveniently package <br/> your tanning essentials while saving you money</p>
-          </div>
-          <div className="row g-5">
-            <div className="col-md-6 discover-card text-center">
-              <div className="discover-img section-image rounded">
-                <img src={discover1} alt="summer collection" className="img-fluid rounded" />
-              </div>
-              <div className="discover-info mt-3">
-                <div>Summer Collection</div>
-                <button className="btn mt-2">Shop now <i className="bi bi-arrow-right ms-2"></i></button>
-              </div>
+      <div className="discover container py-2">
+        <div className="section-title mb-5 favourite-beauty-title text-center">
+          <h2 className="fw-semibold fs-1">More to Discover</h2>
+          <p className="text-center">Our bundles were designed to conveniently package <br /> your tanning essentials while saving you money</p>
+        </div>
+        <div className="row g-5">
+          <div className="col-md-6 discover-card text-center">
+            <div className="discover-img section-image rounded">
+              <img src={discover1} alt="summer collection" className="img-fluid rounded" />
             </div>
-            <div className="col-md-6 discover-card text-center">
-              <div className="discover-img section-image rounded">
-                <img src={discover2} alt="from our blog" className="img-fluid rounded" />
-              </div>
-              <div className="discover-info mt-3">
-                <div>Summer Collection</div>
-                <button className="btn mt-2">Read our blog <i className="bi bi-arrow-right ms-2"></i></button>
-              </div>
+            <div className="discover-info mt-3">
+              <div>Summer Collection</div>
+              <Link to="/shop" className="btn mt-2"> Shop now <i className="bi bi-arrow-right ms-2"></i></Link>
+            </div>
+          </div>
+          <div className="col-md-6 discover-card text-center">
+            <div className="discover-img section-image rounded">
+              <img src={discover2} alt="from our blog" className="img-fluid rounded" />
+            </div>
+            <div className="discover-info mt-3">
+              <div>Discover beauty secrets</div>
+              <Link to="/blog" className="btn mt-2"> Read our blog <i className="bi bi-arrow-right ms-2"></i></Link>
             </div>
           </div>
         </div>
+      </div>
 
 
-        {/* social */}
-        <div className="social-image-container py-5 px-5 mx-auto">
-          <div className="row g-4">
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage1} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+      {/* social */}
+      <div className="social-image-container py-5 px-5 mx-auto">
+        <div className="row g-4">
+          <div className="col-lg-2 cool-md-4">
+            <div className="social-wrapper position-relative overflow-hidden">
+              <img src={socialImage1} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage2} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 cool-md-4">
+            <div className="social-wrapper position-relative overflow-hidden">
+              <img src={socialImage2} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage3} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 cool-md-4">
+            <div className="social-wrapper position-relative overflow-hidden">
+              <img src={socialImage3} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage4} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 cool-md-4">
+            <div className="social-wrapper position-relative overflow-hidden">
+              <img src={socialImage4} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage5} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 cool-md-4">
+            <div className="social-wrapper position-relative overflow-hidden">
+              <img src={socialImage5} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
-            <div className="col-lg-2 cool-md-4">
-              <div className="social-wrapper position-relative overflow-hidden">
-                <img src={socialImage1} alt="social" className="img-fluid" />
-                <i className="bi bi-instagram"></i>
-              </div>
+          </div>
+          <div className="col-lg-2 cool-md-4">
+            <div className="social-wrapper position-relative overflow-hidden">
+              <img src={socialImage1} alt="social" className="img-fluid" />
+              <i className="bi bi-instagram"></i>
             </div>
           </div>
         </div>
+      </div>
+
+      <QuickView
+        selectedProduct={selectedProduct}
+        setSelectedProduct={setSelectedProduct}
+        quantity={quantity}
+        setQuantity={setQuantity}
+        addToCart={addToCart}
+      />
 
       <ToastContainer
         position="top-right"

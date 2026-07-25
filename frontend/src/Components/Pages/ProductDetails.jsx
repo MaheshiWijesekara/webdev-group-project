@@ -4,7 +4,7 @@ import axios from "axios";
 import { AuthContext } from "../../AuthContext";
 import { toast, ToastContainer } from "react-toastify";
 import Navbar from "../Nav/Nav";
-import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
+import Breadcrumbs from "../Features/Breadcrumbs";
 
 function ProductDetails() {
   const { id } = useParams();

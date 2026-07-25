@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 const Breadcrumbs = ({ 
   customTitle, 
   backgroundColor = '#F9F7F2',
-  paddingTop = '80px'
+  paddingTop = '5px'
 }) => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter(x => x);

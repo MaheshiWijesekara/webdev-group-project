@@ -72,7 +72,7 @@ function Footer() {
                                     <Link to="/Contact#returns" className="text-decoration-none">- Start a Return</Link>
                                 </li>
                                 <li className="mb-2">
-                                    <Link to="/Contact" className="text-decoration-none">- Contact Us</Link>
+                                    <Link to="/contact" className="text-decoration-none">- Contact Us</Link>
                                     
                                 </li>
                                 <li className="mb-2">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../Nav/Nav';
 import { toast, ToastContainer } from 'react-toastify';
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+import Breadcrumbs from '../Features/Breadcrumbs';
 
 function Contact() {
   // Logic to handle scrolling to specific sections (Returns/FAQ) if clicked from footer
