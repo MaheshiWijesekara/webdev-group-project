@@ -33,7 +33,7 @@ function Stores() {
                 color: '#2D402E',
                 letterSpacing: '1px'
               }}>
-                Visit Our <span style={{ color: '#B4975A' }}>Botanical</span> Stores
+                Experience <span style={{ color: '#B4975A' }}>Botanical</span> Beauty
               </h1>
               <p className="lead" style={{
                 color: '#666',
@@ -42,8 +42,7 @@ function Stores() {
                 fontSize: '1.1rem',
                 lineHeight: '1.8'
               }}>
-                We're talking about clean beauty gift sets, and we've got a bouquet of beauties 
-                for yourself or someone you love
+                Discover clean beauty essentials and luxurious gift sets made with nature's finest ingredients. Thoughtfully crafted for every skin type and every special occasion
               </p>
             </div>
           </div>

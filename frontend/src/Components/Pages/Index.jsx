@@ -83,6 +83,12 @@ function Index() {
         .catch(err => console.log("Error fetching data:", err));
   }, []);
 
+  // Social images array
+  const socialImages = [
+    socialImage1, socialImage2, socialImage3, 
+    socialImage4, socialImage5, socialImage1
+  ];
+
   return (
     <>
       {/* Hero Swiper */}
@@ -427,18 +433,19 @@ function Index() {
                 <div className="favourite-beauty-banner-title">
                   <h3 className="fs-2" style={{ fontFamily: 'Playfair Display, serif' }}>Empower Yourself</h3>
                   <p className="fs-6">Get the skin you deserve</p>
-                  <button className="btn" style={{
+                  <Link to="/Shop" className="btn" style={{
                     backgroundColor: '#B4975A',
                     color: 'white',
                     border: 'none',
                     padding: '10px 30px',
                     borderRadius: '8px',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    textDecoration: 'none'
                   }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = '#2D402E'}
                   onMouseLeave={(e) => e.target.style.backgroundColor = '#B4975A'}>
                     Explore
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -511,7 +518,7 @@ function Index() {
         </div>
       </div>
 
-      {/* Discover Section */}
+      {/* Discover Section - FIXED BUTTONS */}
       <div className="discover container py-5">
         <div className="section-title mb-5 favourite-beauty-title text-center">
           <span className="d-inline-block mb-2" style={{
@@ -537,18 +544,25 @@ function Index() {
             </div>
             <div className="discover-info mt-3">
               <div style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E', fontSize: '1.8rem' }}>Summer Collection</div>
-              <button className="btn mt-2" style={{
-                backgroundColor: '#2D402E',
-                color: 'white',
-                border: 'none',
-                padding: '10px 30px',
-                borderRadius: '8px',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#B4975A'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#2D402E'}>
+              {/* FIXED: Link to Shop */}
+              <Link 
+                to="/Shop" 
+                className="btn mt-2"
+                style={{
+                  backgroundColor: '#2D402E',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 30px',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#B4975A'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#2D402E'}
+              >
                 Shop now <i className="bi bi-arrow-right ms-2"></i>
-              </button>
+              </Link>
             </div>
           </div>
           <div className="col-md-6 discover-card text-center">
@@ -557,62 +571,99 @@ function Index() {
             </div>
             <div className="discover-info mt-3">
               <div style={{ fontFamily: 'Playfair Display, serif', color: '#2D402E', fontSize: '1.8rem' }}>From Our Blog</div>
-              <button className="btn mt-2" style={{
-                backgroundColor: '#2D402E',
-                color: 'white',
-                border: 'none',
-                padding: '10px 30px',
-                borderRadius: '8px',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#B4975A'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#2D402E'}>
+              {/* FIXED: Link to Blog */}
+              <Link 
+                to="/Blog" 
+                className="btn mt-2"
+                style={{
+                  backgroundColor: '#2D402E',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 30px',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#B4975A'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#2D402E'}
+              >
                 Read our blog <i className="bi bi-arrow-right ms-2"></i>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Social Section */}
+      {/* Social Section - WITH INSTAGRAM HOVER EFFECT */}
       <div className="social-image-container py-5 px-5 mx-auto">
         <div className="row g-3">
-          <div className="col-lg-2 col-md-4 col-6">
-            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
-              <img src={socialImage1} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
+          {socialImages.map((image, index) => (
+            <div className="col-lg-2 col-md-4 col-6" key={index}>
+              <div 
+                className="social-wrapper position-relative overflow-hidden" 
+                style={{ 
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  position: 'relative'
+                }}
+              >
+                <img 
+                  src={image} 
+                  alt="social" 
+                  className="img-fluid" 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.6s ease'
+                  }}
+                />
+                {/* Instagram Overlay - Appears on hover */}
+                <div 
+                  className="social-overlay"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(45, 64, 46, 0.6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 0,
+                    transition: 'all 0.4s ease',
+                    borderRadius: '12px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                    e.currentTarget.previousElementSibling.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '0';
+                    e.currentTarget.previousElementSibling.style.transform = 'scale(1)';
+                  }}
+                >
+                  <i 
+                    className="bi bi-instagram" 
+                    style={{ 
+                      fontSize: '3rem', 
+                      color: 'white',
+                      transform: 'scale(0.8)',
+                      transition: 'transform 0.4s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'scale(0.8)';
+                    }}
+                  ></i>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="col-lg-2 col-md-4 col-6">
-            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
-              <img src={socialImage2} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 col-md-4 col-6">
-            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
-              <img src={socialImage3} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 col-md-4 col-6">
-            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
-              <img src={socialImage4} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 col-md-4 col-6">
-            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
-              <img src={socialImage5} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
-          <div className="col-lg-2 col-md-4 col-6">
-            <div className="social-wrapper position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
-              <img src={socialImage1} alt="social" className="img-fluid" />
-              <i className="bi bi-instagram"></i>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
