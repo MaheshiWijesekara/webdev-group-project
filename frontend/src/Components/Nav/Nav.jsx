@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../AuthContext';
+import { toast } from 'react-toastify';
 
 const Nav = () => {
     const { user, login, logout } = useContext(AuthContext);
@@ -9,6 +10,7 @@ const Nav = () => {
     const [wishlistCount, setWishlistCount] = useState(0);
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Form states for login and signup
     const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -17,9 +19,14 @@ const Nav = () => {
     const handleLoginChange = (e) => { setLoginData({ ...loginData, [e.target.name]: e.target.value }); };
     const handleSignupChange = (e) => { setFormData({ ...formData, [e.target.name]: e.target.value }); };
 
+    // Switch between login and signup modes with form clearing
+    const switchToLogin = () => { setIsLoginMode(true); setFormData({ name: '', email: '', password: '' }); };
+    const switchToSignup = () => { setIsLoginMode(false); setLoginData({ email: '', password: '' }); };
+
     // Handle user login with API call
     const handleLogin = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             const response = await axios.post('http://localhost:5000/api/login', loginData);
             login(response.data.user, response.data.token);
@@ -32,12 +39,15 @@ const Nav = () => {
             setLoginData({ email: '', password: '' });
         } catch (error) {
             toast.error(error.response?.data?.error || "Login Failed");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     // Handle user registration with API call
     const handleSignup = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             await axios.post('http://localhost:5000/api/register', formData);
             toast.success("Account created successfully! Please sign in.");
@@ -45,6 +55,8 @@ const Nav = () => {
             setFormData({ name: '', email: '', password: '' });
         } catch (error) {
             toast.error(error.response?.data?.error || "Signup Failed");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -110,6 +122,7 @@ const Nav = () => {
                         <li><Link to="/" className="nav-link">Home</Link></li>
                         <li><Link to="/About" className="nav-link">About</Link></li>
                         <li><Link to="/Shop" className="nav-link">Shop All</Link></li>
+                        <li><Link to="/Stores" className="nav-link">Stores</Link></li>
                         <li><Link to="/Blog" className="nav-link">Blog</Link></li>
                         <li><Link to="/Contact" className="nav-link">Contact</Link></li>
                     </ul>
@@ -153,7 +166,7 @@ const Nav = () => {
             </nav>
         </div>
 
-        {/* AUTH MODAL - Login/Signup with toggle */}
+        {/* AUTH MODAL - Login/Signup with toggle and loading states */}
         <div className="modal fade" id="authModal" tabIndex="-1" aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '450px' }}>
                 <div className="modal-content border-0" style={{ borderRadius: '16px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)', backgroundColor: 'white', padding: '10px' }}>
@@ -190,16 +203,17 @@ const Nav = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <button type="submit" className="btn w-100 py-3 fw-bold mt-2" style={{ backgroundColor: '#2D402E', color: 'white', border: 'none', borderRadius: '10px', letterSpacing: '1.5px', fontSize: '0.9rem', transition: 'all 0.3s ease' }}
-                                onMouseEnter={(e) => e.target.style.backgroundColor = '#5C4033'} onMouseLeave={(e) => e.target.style.backgroundColor = '#2D402E'}>
-                                    <i className="bi bi-box-arrow-in-right me-2"></i> Sign In
+                                <button type="submit" className="btn w-100 py-3 fw-bold mt-2" disabled={isSubmitting} style={{ backgroundColor: '#2D402E', color: 'white', border: 'none', borderRadius: '10px', letterSpacing: '1.5px', fontSize: '0.9rem', transition: 'all 0.3s ease', opacity: isSubmitting ? 0.7 : 1 }}
+                                onMouseEnter={(e) => { if (!e.target.disabled) { e.target.style.backgroundColor = '#5C4033'; } }}
+                                onMouseLeave={(e) => { if (!e.target.disabled) { e.target.style.backgroundColor = '#2D402E'; } }}>
+                                    {isSubmitting ? (<><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Signing In...</>) : (<><i className="bi bi-box-arrow-in-right me-2"></i> Sign In</>)}
                                 </button>
                                 <div className="text-center mt-4">
                                     <p className="small text-muted mb-0">New to Virelle?{' '}
                                         <a href="#" className="fw-bold" style={{ color: '#B4975A', textDecoration: 'none', borderBottom: '2px solid #B4975A', paddingBottom: '2px', transition: 'all 0.3s ease' }}
                                         onMouseEnter={(e) => { e.target.style.color = '#2D402E'; e.target.style.borderBottomColor = '#2D402E'; }}
                                         onMouseLeave={(e) => { e.target.style.color = '#B4975A'; e.target.style.borderBottomColor = '#B4975A'; }}
-                                        onClick={(e) => { e.preventDefault(); setIsLoginMode(false); }}>Create Account</a>
+                                        onClick={(e) => { e.preventDefault(); switchToSignup(); }}>Create Account</a>
                                     </p>
                                 </div>
                             </form>
@@ -230,16 +244,17 @@ const Nav = () => {
                                     </div>
                                     <small className="text-muted" style={{ fontSize: '0.7rem' }}>Password must be at least 6 characters</small>
                                 </div>
-                                <button type="submit" className="btn w-100 py-3 fw-bold mt-2" style={{ backgroundColor: '#B4975A', color: 'white', border: 'none', borderRadius: '10px', letterSpacing: '1.5px', fontSize: '0.9rem', transition: 'all 0.3s ease' }}
-                                onMouseEnter={(e) => e.target.style.backgroundColor = '#2D402E'} onMouseLeave={(e) => e.target.style.backgroundColor = '#B4975A'}>
-                                    <i className="bi bi-person-plus me-2"></i> Create Account
+                                <button type="submit" className="btn w-100 py-3 fw-bold mt-2" disabled={isSubmitting} style={{ backgroundColor: '#B4975A', color: 'white', border: 'none', borderRadius: '10px', letterSpacing: '1.5px', fontSize: '0.9rem', transition: 'all 0.3s ease', opacity: isSubmitting ? 0.7 : 1 }}
+                                onMouseEnter={(e) => { if (!e.target.disabled) { e.target.style.backgroundColor = '#2D402E'; } }}
+                                onMouseLeave={(e) => { if (!e.target.disabled) { e.target.style.backgroundColor = '#B4975A'; } }}>
+                                    {isSubmitting ? (<><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Creating Account...</>) : (<><i className="bi bi-person-plus me-2"></i> Create Account</>)}
                                 </button>
                                 <div className="text-center mt-4">
                                     <p className="small text-muted mb-0">Already have an account?{' '}
                                         <a href="#" className="fw-bold" style={{ color: '#B4975A', textDecoration: 'none', borderBottom: '2px solid #B4975A', paddingBottom: '2px', transition: 'all 0.3s ease' }}
                                         onMouseEnter={(e) => { e.target.style.color = '#2D402E'; e.target.style.borderBottomColor = '#2D402E'; }}
                                         onMouseLeave={(e) => { e.target.style.color = '#B4975A'; e.target.style.borderBottomColor = '#B4975A'; }}
-                                        onClick={(e) => { e.preventDefault(); setIsLoginMode(true); }}>Sign In</a>
+                                        onClick={(e) => { e.preventDefault(); switchToLogin(); }}>Sign In</a>
                                     </p>
                                 </div>
                             </form>
