@@ -12,14 +12,10 @@ require('dotenv').config();
 const app = express();
 
 // --- MIDDLEWARE ---
-app.use(cors()); //allow frontend to access backend
+app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:5174'], credentials: true }));
 app.use(express.json()); //understand JSON data in request body
 app.use(express.urlencoded({ extended: true })); //allow read html form data
 
-// --- MULTER SETUP - File upload for product and blog images ---
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // --- CREATE UPLOADS FOLDER IF NOT EXISTS ---
 if (!fs.existsSync('uploads')) { fs.mkdirSync('uploads'); console.log('📁 Created uploads folder'); }
