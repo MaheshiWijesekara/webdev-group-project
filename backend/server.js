@@ -11,11 +11,11 @@ require('dotenv').config();
 const app = express();
 
 // --- MIDDLEWARE ---
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors()); //allow frontend to access backend
+app.use(express.json()); //understand JSON data in request body
+app.use(express.urlencoded({ extended: true })); //allow read html form data
 
-// --- MULTER SETUP - File upload configuration for product and blog images ---
+// --- MULTER SETUP - File upload for product and blog images ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, 'uploads/'); },
     filename: (req, file, cb) => { cb(null, Date.now() + path.extname(file.originalname)); }
@@ -24,7 +24,7 @@ const upload = multer({ storage: storage });
 app.use('/uploads', express.static('uploads'));
 
 // --- DATABASE CONNECTION ---
-const db = mysql.createConnection({
+const db = mysql.createConnection({ //connect nodejs to mysql database
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
@@ -43,16 +43,16 @@ app.get('/api/products', (req, res) => {
     const category = req.query.category || 'all';
     const availability = req.query.availability || 'all';
     const sortBy = req.query.sortBy || 'default';
-    const offset = (page - 1) * limit;
+    const offset = (page - 1) * limit; //tells MySQL how many products to skip before returning results.
 
     let query = "FROM products WHERE pname LIKE ?";
-    let params = [`%${search}%`];
+    let params = [`%${search}%`]; //store the value replace ?
     if (category !== 'all') { query += " AND category = ?"; params.push(category); }
     if (availability !== 'all') { query += " AND availability = ?"; params.push(availability); }
 
-    let sortSql = "";
+    let sortSql = ""; //empty sorting
     if (sortBy === 'New') sortSql = " ORDER BY id DESC";
-    else if (sortBy === 'Sale') sortSql = " AND tag = 'Sale'";
+    else if (sortBy === 'Sale') sortSql = " AND tag = 'Sale'"; 
 
     const dataSql = `SELECT * ${query} ${sortSql} LIMIT ? OFFSET ?`;
     const countSql = `SELECT COUNT(*) as total ${query}`;
