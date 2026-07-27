@@ -6,6 +6,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -16,11 +17,19 @@ app.use(express.json()); //understand JSON data in request body
 app.use(express.urlencoded({ extended: true })); //allow read html form data
 
 // --- MULTER SETUP - File upload for product and blog images ---
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// --- CREATE UPLOADS FOLDER IF NOT EXISTS ---
+if (!fs.existsSync('uploads')) { fs.mkdirSync('uploads'); console.log('📁 Created uploads folder'); }
+
+// --- MULTER SETUP - File upload configuration ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => { cb(null, 'uploads/'); },
     filename: (req, file, cb) => { cb(null, Date.now() + path.extname(file.originalname)); }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
 app.use('/uploads', express.static('uploads'));
 
 // --- DATABASE CONNECTION ---
@@ -29,11 +38,24 @@ const db = mysql.createConnection({ //connect nodejs to mysql database
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
+const db = mysql.createConnection({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'virelle_db',
     port: process.env.DB_PORT || 3306
 });
-db.connect(err => { if (err) { console.error("Database Connection Failed!:", err.message); } else { console.log("MySQL Connected..."); } });
+db.connect(err => {
+    if (err) { console.error("❌ Database Connection Failed!:", err.message); console.log("💡 Make sure MySQL is running and credentials are correct"); }
+    else { console.log("✅ MySQL Connected..."); }
+});
 
+// --- TEST ROUTE ---
+app.get('/api/test', (req, res) => { res.json({ message: 'Server is running!' }); });
+
+// ==========================================
 // PRODUCT ROUTES
+// ==========================================
 
 // GET all products with search, pagination, category, and sorting
 app.get('/api/products', (req, res) => {
@@ -58,9 +80,9 @@ app.get('/api/products', (req, res) => {
     const countSql = `SELECT COUNT(*) as total ${query}`;
 
     db.query(dataSql, [...params, limit, offset], (err, products) => {
-        if (err) return res.status(500).json(err);
+        if (err) { console.error("Products Query Error:", err); return res.status(500).json({ error: err.message }); }
         db.query(countSql, params, (err, countResult) => {
-            if (err) return res.status(500).json(err);
+            if (err) { console.error("Count Query Error:", err); return res.status(500).json({ error: err.message }); }
             const totalProducts = countResult[0].total;
             const totalPages = Math.ceil(totalProducts / limit);
             res.json({ products: products, totalPages: totalPages, currentPage: page });
@@ -68,7 +90,7 @@ app.get('/api/products', (req, res) => {
     });
 });
 
-// GET single product by ID (for product details page)
+// GET single product by ID
 app.get('/api/products/:id', (req, res) => {
     db.query("SELECT * FROM products WHERE id = ?", [req.params.id], (err, result) => {
         if (err) return res.status(500).json(err);
@@ -79,8 +101,8 @@ app.get('/api/products/:id', (req, res) => {
 // POST - Add new product with two images (main + hover)
 app.post('/api/products', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'secondImage', maxCount: 1 }]), (req, res) => {
     const { pname, pdescription, price, tag, category, subcategory, rating, availability } = req.body;
-    const imagePath = req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : null;
-    const secondImagePath = req.files['secondImage'] ? `/uploads/${req.files['secondImage'][0].filename}` : null;
+    const imagePath = req.files && req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : null;
+    const secondImagePath = req.files && req.files['secondImage'] ? `/uploads/${req.files['secondImage'][0].filename}` : null;
     const sql = `INSERT INTO products (image, secondImage, pname, pdescription, price, tag, category, subcategory, rating, availability) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     db.query(sql, [imagePath, secondImagePath, pname, pdescription, price, tag, category, subcategory, rating || 5, availability || 'In'], (err, result) => {
         if (err) { console.error("Insert Error:", err); return res.status(500).json({ error: err.message }); }
@@ -96,7 +118,9 @@ app.delete('/api/products/:id', (req, res) => {
     });
 });
 
+// ==========================================
 // USER AUTHENTICATION ROUTES
+// ==========================================
 
 // Register new user with hashed password
 app.post('/api/register', async (req, res) => {
@@ -147,7 +171,9 @@ app.put('/api/user/password', async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Server error during password update" }); }
 });
 
+// ==========================================
 // CART ROUTES
+// ==========================================
 
 // Add product to cart (update quantity if already exists)
 app.post('/api/cart/add', (req, res) => {
@@ -183,7 +209,9 @@ app.delete('/api/cart/clear/:userId', (req, res) => {
     });
 });
 
+// ==========================================
 // ORDER ROUTES
+// ==========================================
 
 // Place order with items - creates order and order_items records
 app.post('/api/orders', (req, res) => {
@@ -199,14 +227,6 @@ app.post('/api/orders', (req, res) => {
     });
 });
 
-// Get order details by order ID
-app.get('/api/order-details/:orderId', (req, res) => {
-    db.query("SELECT * FROM order_items WHERE order_id = ?", [req.params.orderId], (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
-    });
-});
-
 // Get all orders for a specific user
 app.get('/api/orders/:userId', (req, res) => {
     db.query("SELECT id, total_amount, status, order_date FROM orders WHERE user_id = ? ORDER BY order_date DESC", [req.params.userId], (err, results) => {
@@ -215,7 +235,38 @@ app.get('/api/orders/:userId', (req, res) => {
     });
 });
 
+// ==========================================
+// REVIEW ROUTES
+// ==========================================
+
+// Get all reviews for a product with user names
+app.get('/api/reviews/:productId', (req, res) => {
+    db.query("SELECT product_reviews.*, users.name as user_name FROM product_reviews JOIN users ON product_reviews.user_id = users.id WHERE product_reviews.product_id = ? ORDER BY product_reviews.review_date DESC", [req.params.productId], (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+
+// Add new product review
+app.post('/api/reviews', (req, res) => {
+    const { userId, productId, comment, rating } = req.body;
+    db.query("INSERT INTO product_reviews (user_id, product_id, comment, rating) VALUES (?, ?, ?, ?)", [userId, productId, comment, rating], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.status(201).json({ message: "Review added!" });
+    });
+});
+
+// Delete a review by ID
+app.delete('/api/reviews/:id', (req, res) => {
+    db.query("DELETE FROM product_reviews WHERE id = ?", [req.params.id], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Review deleted" });
+    });
+});
+
+// ==========================================
 // BLOG ROUTES
+// ==========================================
 
 // Get all blogs (ordered newest first)
 app.get('/api/blogs', (req, res) => {
@@ -249,40 +300,15 @@ app.post('/api/blogs', upload.single('image'), (req, res) => {
 // Delete blog by ID
 app.delete('/api/blogs/:id', (req, res) => {
     db.query("DELETE FROM blogs WHERE id = ?", [req.params.id], (err, result) => {
-        if (err) { console.error("Delete Error:", err); return res.status(500).json({ error: "Failed to delete blog: " + err.message }); }
+        if (err) return res.status(500).json({ error: err.message });
         if (result.affectedRows === 0) return res.status(404).json({ error: "Blog not found" });
         res.json({ message: "Blog deleted successfully!" });
     });
 });
 
-// REVIEW ROUTES
-
-// Get all reviews for a product with user names
-app.get('/api/reviews/:productId', (req, res) => {
-    db.query("SELECT product_reviews.*, users.name as user_name FROM product_reviews JOIN users ON product_reviews.user_id = users.id WHERE product_reviews.product_id = ? ORDER BY product_reviews.review_date DESC", [req.params.productId], (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
-    });
-});
-
-// Add new product review
-app.post('/api/reviews', (req, res) => {
-    const { userId, productId, comment, rating } = req.body;
-    db.query("INSERT INTO product_reviews (user_id, product_id, comment, rating) VALUES (?, ?, ?, ?)", [userId, productId, comment, rating], (err, result) => {
-        if (err) return res.status(500).json(err);
-        res.status(201).json({ message: "Review added!" });
-    });
-});
-
-// Delete a review by ID
-app.delete('/api/reviews/:id', (req, res) => {
-    db.query("DELETE FROM product_reviews WHERE id = ?", [req.params.id], (err, result) => {
-        if (err) return res.status(500).json(err);
-        res.json({ message: "Review deleted" });
-    });
-});
-
+// ==========================================
 // ADMIN ROUTES
+// ==========================================
 
 // Get admin stats - total users and total sales
 app.get('/api/admin/stats', (req, res) => {
@@ -312,7 +338,9 @@ app.put('/api/admin/orders/:id', (req, res) => {
     });
 });
 
+// ==========================================
 // OTHER ROUTES
+// ==========================================
 
 // Subscribe to newsletter
 app.post('/api/subscribe', (req, res) => {
@@ -325,3 +353,9 @@ app.post('/api/subscribe', (req, res) => {
         res.status(201).json({ message: "Subscribed!" });
     });
 });
+
+// ==========================================
+// START SERVER
+// ==========================================
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => { console.log(`Server running on port ${PORT}`); });
