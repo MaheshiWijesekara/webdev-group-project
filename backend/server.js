@@ -33,11 +33,7 @@ const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } 
 app.use('/uploads', express.static('uploads'));
 
 // --- DATABASE CONNECTION ---
-const db = mysql.createConnection({ //connect nodejs to mysql database
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
+
 const db = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
